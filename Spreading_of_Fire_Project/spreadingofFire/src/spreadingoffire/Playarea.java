@@ -16,13 +16,14 @@ import javax.swing.JPanel;
  */
 public class Playarea extends JPanel {
 
+
     public Playarea() {
         this.setSize(600   , 600);
+        //set default background 
         this.setBackground(Color.YELLOW);  
     }
-    
-   
-    
+      
+    //Draw grid
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);

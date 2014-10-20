@@ -10,8 +10,8 @@ import java.awt.Color;
 import javax.swing.JPanel;
 
 /**
- *
- * @author Pll_lMe
+ * Set default size and background of program
+ * 
  */
 public class Optionarea extends JPanel {
 

@@ -1,2 +1,0 @@
-spreadingofFire.Burnarea
-spreadingofFire.BurnArea

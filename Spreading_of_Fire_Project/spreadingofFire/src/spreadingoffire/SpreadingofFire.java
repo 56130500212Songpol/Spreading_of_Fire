@@ -17,14 +17,15 @@ public class SpreadingofFire {
     /**
      * @param args the command line arguments
      */
+        static final JFrame frame = new JFrame();
+        static final Playarea area1 = new Playarea();        
+        static final Optionarea area2 = new Optionarea(); 
+    
     public static void main(String[] args) {
-        final JFrame frame = new JFrame();
-        frame.setSize(900,630);
-          
-        final Playarea area1 = new Playarea();        
-        frame.add(area1);
         
-        final Optionarea area2 = new Optionarea();        
+        
+        frame.setSize(900,630);
+        frame.add(area1);
         frame.add(area2);
         
         
