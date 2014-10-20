@@ -1,6 +1,10 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-
-package spreadingofFire;
+package spreadingoffire;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -8,16 +12,18 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author 5427030,56130500212,56130500222
+ * @author Pll_lMe
  */
-public class BurnArea extends JPanel {
-    
-    
-    public burnarea(){
+public class Playarea extends JPanel {
+
+    public Playarea() {
         this.setSize(600   , 600);
         this.setBackground(Color.YELLOW);  
     }
     
+   
+    
+    @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         g.setColor(Color.black);
@@ -32,6 +38,4 @@ public class BurnArea extends JPanel {
         
         
     }
-        
-    
 }

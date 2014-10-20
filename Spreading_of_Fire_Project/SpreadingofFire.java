@@ -1,12 +1,16 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-
-package spreadingofFire;
+package spreadingoffire;
 
 import javax.swing.JFrame;
 
 /**
  *
- * @author 5427030,56130500212,56130500222
+ * @author Pll_lMe
  */
 public class SpreadingofFire {
 
@@ -16,12 +20,14 @@ public class SpreadingofFire {
     public static void main(String[] args) {
         final JFrame frame = new JFrame();
         frame.setSize(900,630);
-        
-        final BurnArea area1 = new burnarea();        
+          
+        final Playarea area1 = new Playarea();        
         frame.add(area1);
         
-        final OptionArea area2 = new OptionArea();        
+        final Optionarea area2 = new Optionarea();        
         frame.add(area2);
+        
+        
         
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
