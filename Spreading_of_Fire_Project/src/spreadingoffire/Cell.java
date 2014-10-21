@@ -16,4 +16,31 @@ public class Cell {
     state = Cell.EMPTY;
   }
   
+   /**
+   * Constructor - create the cell by state
+   *
+   * @param state
+   */
+  public Cell(int state) {
+    this.state = state;
+  }
+  
+  /**
+   * get the state of cell
+   *
+   * @return state
+   */
+  public int getState() {
+    return state;
+  }
+  
+  /**
+   * set the state of cell
+   *
+   * @param state
+   */
+  public void setState(int state) {
+    this.state = state;
+  }
+  
 }
