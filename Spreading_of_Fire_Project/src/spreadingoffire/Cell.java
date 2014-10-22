@@ -16,7 +16,7 @@ public class Cell {
     state = Cell.EMPTY;
   }
   
-  /**
+   /**
    * Constructor - create the cell by state
    *
    * @param state

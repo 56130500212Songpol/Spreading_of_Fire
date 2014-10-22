@@ -53,3 +53,4 @@ public class Model {
     return this.numCell;
   }
 }
+

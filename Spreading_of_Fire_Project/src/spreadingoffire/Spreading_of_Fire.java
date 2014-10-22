@@ -30,3 +30,4 @@ public class Spreading_of_Fire extends JFrame {
     setVisible(true);
   }
 }
+
