@@ -20,7 +20,7 @@ public class Spreading_of_Fire extends JFrame {
     Container contentPane = this.getContentPane();
     view = new View();
     view.setSeeValue(true); //user can see the value of each cell. If do not want to see, set to false
-    view.setSeeEdge(true); //user can see the edge of each cell. If do not want to see, set to false
+    view.setSeeBorder(true); //user can see the border of each cell. If do not want to see, set to false
     model = new Model(view,25);
     model.initForest();
     setResizable(false); // cannot change the size of frame
