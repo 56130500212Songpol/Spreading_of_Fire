@@ -14,7 +14,7 @@ class View extends JPanel {
   
   private Cell[][] cell;
   private int pixel;
-  private boolean seeValue, seeEdge;
+  private boolean seeValue, seeBorder;
   public static final Color EMPTY_COLOR = new Color(255, 255, 0);
   public static final Color TREE_COLOR = new Color(0, 180, 0);
   public static final Color BURNING_COLOR = new Color(255, 0, 0);
@@ -28,8 +28,8 @@ class View extends JPanel {
     pixel = 24;
     //do not see value of each cell
     seeValue = false;
-    //do not see the edeg of each cell
-    seeEdge = false;
+    //do not see the border of each cell
+    seeBorder = false;
     
     setLayout(new FlowLayout(5, 655, 2));
   }
@@ -79,7 +79,7 @@ class View extends JPanel {
               }
             } 
           }
-          if (isSeeEdge()) { //if user set the seeEdge to true, it will show edge of each cell
+          if (isSeeBorder()) { //if user set the seeEdge to true, it will show border of each cell
             g.drawRect(x, y, getPixel(), getPixel()); //draw rectangular for each cell
           }
         }
@@ -106,21 +106,21 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to check the boolean of see edge
+   * The method use to check the boolean of see border
    * 
-   * @return seeEdge
+   * @return seeBorder
    */
-  public boolean isSeeEdge() {
-    return seeEdge;
+  public boolean isSeeBorder() {
+    return seeBorder;
   }
   
   /**
-   * The method use to set the boolean see edge
+   * The method use to set the boolean see border
    * 
-   * @param seeEdge
+   * @param seeBorder
    */
-  public void setSeeEdge(boolean seeEdge) {
-    this.seeEdge = seeEdge;
+  public void setSeeEdge(boolean seeBorder) {
+    this.seeBorder = seeBorder;
   }
   
   /**
