@@ -119,7 +119,7 @@ class View extends JPanel {
    * 
    * @param seeBorder
    */
-  public void setSeeEdge(boolean seeBorder) {
+  public void setSeeBorder(boolean seeBorder) {
     this.seeBorder = seeBorder;
   }
   
