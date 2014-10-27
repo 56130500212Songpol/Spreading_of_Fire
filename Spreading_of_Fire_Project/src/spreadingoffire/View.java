@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 /**
  * The view class of project
  *
- * @author SpreadingOfFire
- * @version 21/10/2014
+ * @author OOSD Project Group 5
+ * @version 27/10/2014
  */
 class View extends JPanel {
   
@@ -35,7 +35,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to update the view.
+   * Update the view.
    * 
    * @param cell[][]
    */
@@ -45,7 +45,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to paint the component in the view
+   * Paint the component in the view
    * 
    * @param g
    */
@@ -88,7 +88,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to set the size of cell
+   * Set the size of cell
    * 
    * @param pixel
    */
@@ -97,7 +97,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to get the size of cell
+   * Get the size of cell
    * 
    * @return pixel
    */
@@ -106,7 +106,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to check the boolean of see border
+   * Check the boolean of see border
    * 
    * @return seeBorder
    */
@@ -115,7 +115,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to set the boolean see border
+   * Set the boolean see border
    * 
    * @param seeBorder
    */
@@ -124,7 +124,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to check the boolean of see value
+   * Check the boolean of see value
    * 
    * @return seeValue
    */
@@ -133,7 +133,7 @@ class View extends JPanel {
   }
   
   /**
-   * The method use to set the boolean of seeValue
+   * Set the boolean of seeValue
    * 
    * @param seeValue
    */
