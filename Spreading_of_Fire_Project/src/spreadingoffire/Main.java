@@ -1,8 +1,8 @@
 /**
- * The main class of project
+ * The main class of project use for run the project
  *
  * @author OOSD Project Group 5
- * @version 27/10/2014
+ * @version 28/10/2014
  */
 public class Main{
   public static void main(String args[]){

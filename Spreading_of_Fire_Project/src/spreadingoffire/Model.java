@@ -4,7 +4,7 @@ import java.util.Random;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 27/10/2014
+ * @version 28/10/2014
  */
 public class Model {
   
@@ -37,6 +37,15 @@ public class Model {
     for (int i = 0; i <= cell.length - 1; i++) {
       for (int j = 0; j <= cell.length - 1; j++) {
         cell[i][j] = new Cell(Cell.TREE);//assign every cell is a TREE
+        if (random.nextDouble() < probTree) {           //tree at site
+          if (random.nextDouble() < probBurning) {    //tree is burning
+            cell[i][j].setState(Cell.BURNING);
+          } else {                                    //tree is not buring
+            cell[i][j].setState(Cell.TREE);
+          }
+        } else {                                        //no tree at site
+          cell[i][j].setState(Cell.EMPTY);
+        }
         if (i == 0 || i == cell.length - 1 || j == 0 || j == cell.length - 1) {
           cell[i][j] = new Cell(0); //create absorbing boundary condition
         }
