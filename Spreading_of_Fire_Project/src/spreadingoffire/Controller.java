@@ -1,12 +1,14 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JSlider;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * The controller class of project which contain buttons and sliders
@@ -21,6 +23,9 @@ public class Controller extends JPanel {
   private JLabel how,probCatch, probTree, probBurning, delay, probCatchShow, probTreeShow, probBurningShow, delayShow;
   private View view;
   private Model model;
+    private JLabel initialBurn;
+    private JRadioButton random, middle;
+    private ButtonGroup Burnbutton;
   
   /**
    * Constructor - create controller panel 
@@ -31,9 +36,43 @@ public class Controller extends JPanel {
     model.initForest();
     setLayout(new GridLayout());
     addInteractButton(); // add reset button, and auto button,step button to controller panel
+    addRadioButton(); // add initialBurn radio button
     addProbSlider(); // add probCatch slider, probTree slider, probBuring slider, and delay slider to controller panel
     add(view); // add view to controller panel
   }
+  
+  private void addRadioButton() {
+      initialBurn =  new JLabel("**select position of initial burn tree:**");
+      view.add(initialBurn);
+      random = new JRadioButton("Random Tree");
+      middle = new JRadioButton("Middle Tree");
+      Burnbutton = new ButtonGroup();
+      Burnbutton.add(random);
+      Burnbutton.add(middle);
+      
+      
+      middle.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        model.initForest(); // reset the forest
+            }
+        });
+      
+      random.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        model.initForestRandom();
+            }
+        });
+      
+      view.add(random);
+      view.add(middle);
+      
+  }
+  
+  
+  
+  
   
   /**
    * Add text and button to controller panel

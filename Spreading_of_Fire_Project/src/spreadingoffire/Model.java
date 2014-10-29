@@ -29,6 +29,30 @@ public class Model {
     checkCellCannotFire = new boolean[numCell][numCell];
   }
   
+  public void initForestRandom() {
+    cell = new Cell[getNumCell()][getNumCell()];//create array of cell, size = number of cell x number of cell
+    for (int i = 0; i <= cell.length - 1; i++) {
+      for (int j = 0; j <= cell.length - 1; j++) {
+        cell[i][j] = new Cell(Cell.TREE);//assign every cell is a TREE
+        if (random.nextDouble() < probTree) {           //tree at site
+          if (random.nextDouble() < probBurning) {    //tree is burning
+            cell[i][j].setState(Cell.BURNING);
+          } else {                                    //tree is not buring
+            cell[i][j].setState(Cell.TREE);
+          }
+        } else {                                        //no tree at site
+          cell[i][j].setState(Cell.EMPTY);
+        }
+        if (i == 0 || i == cell.length - 1 || j == 0 || j == cell.length - 1) {
+          cell[i][j] = new Cell(0); //create absorbing boundary condition
+        }
+      }
+    }
+    int range = (cell.length-2 - 1) + 1;       
+    cell[(int)(Math.random() * range) + 1][(int)(Math.random() * range) + 1].setState(Cell.BURNING); //set the initial burning cell in the middle
+    view.updateView(cell); //update the color of each cell
+  }
+  
   /** 
    *  Create the forest(view) that contain many(cell) 
    */
