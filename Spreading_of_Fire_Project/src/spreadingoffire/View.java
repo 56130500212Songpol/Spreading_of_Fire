@@ -8,7 +8,7 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 28/10/2014
+ * @version 29/10/2014
  */
 class View extends JPanel {
   
