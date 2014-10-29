@@ -2,7 +2,7 @@
  * This cell class that contains the state of cell
  *
  * @author OOSD Project Group 5
- * @version 29/10/2014
+ * @version 28/10/2014
  */
 public class Cell {
   

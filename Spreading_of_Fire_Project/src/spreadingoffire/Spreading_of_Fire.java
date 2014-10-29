@@ -5,7 +5,7 @@ import javax.swing.JFrame;
  * The visualization class of project(Frame class)
  *
  * @author OOSD Project Group 5
- * @version 29/10/2014
+ * @version 28/10/2014
  */
 public class Spreading_of_Fire extends JFrame {
   
