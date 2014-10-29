@@ -10,7 +10,7 @@ public class Cell {
   private int state;
   
   /**
-   * Constructor - create the cell by EMPTY state
+   * Constructor - create the cell by TREE state
    */
   public Cell() {
     state = Cell.TREE;
