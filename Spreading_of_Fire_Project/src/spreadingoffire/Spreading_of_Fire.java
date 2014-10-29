@@ -14,7 +14,7 @@ public class Spreading_of_Fire extends JFrame {
   public Spreading_of_Fire() {
     super("Spreading of Fire"); // change the name of frame
     Container contentPane = this.getContentPane();
-    controller = new Controller();
+    controller = new Controller(); // create new Controller
     setResizable(false); // cannot resize frame
     setSize(900, 683); // set size of frame
     setDefaultCloseOperation(EXIT_ON_CLOSE);
