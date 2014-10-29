@@ -31,7 +31,7 @@ class View extends JPanel {
     //do not see the border of each cell
     seeBorder = false;
     
-    setLayout(new FlowLayout(5, 655, 12));
+    setLayout(new FlowLayout(5, 655, 3));
   }
   
   /**

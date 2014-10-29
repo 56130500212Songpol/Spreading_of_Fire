@@ -1,22 +1,14 @@
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-<<<<<<< HEAD
-import javax.swing.JSlider;
-import javax.swing.JRadioButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.ButtonGroup;
-=======
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
->>>>>>> origin/master
+import javax.swing.JButton;
+import javax.swing.JSlider;
+import javax.swing.JRadioButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.ButtonGroup;
 
 /**
  * The controller class of project which contain buttons and sliders
@@ -36,14 +28,8 @@ public class Controller extends JPanel {
   private JPanel buttonArea;
   private View view;
   private Model model;
-<<<<<<< HEAD
   private boolean isRandom = false, isMiddle = false, isChangeSetting = false,
     isOnWorld = false;
-=======
-    private JLabel initialBurn;
-    private JRadioButton random, middle;
-    private ButtonGroup Burnbutton;
->>>>>>> origin/master
   
   /**
    * Constructor - create controller panel 
@@ -54,48 +40,11 @@ public class Controller extends JPanel {
     model.initForest();
     setLayout(new GridLayout());
     addInteractButton(); // add reset button, and auto button,step button to controller panel
-<<<<<<< HEAD
     addForestSizeRadioButton(); // add resize forest button, tiny, small, medium, large, huge, and world
     addInitialBurningTreeRadioButton(); // add initial burning tree button, random or middle
-=======
-    addRadioButton(); // add initialBurn radio button
->>>>>>> origin/master
     addProbSlider(); // add probCatch slider, probTree slider, probBuring slider, and delay slider to controller panel
     add(view); // add view to controller panel
   }
-  
-  private void addRadioButton() {
-      initialBurn =  new JLabel("**select position of initial burn tree:**");
-      view.add(initialBurn);
-      random = new JRadioButton("Random Tree");
-      middle = new JRadioButton("Middle Tree");
-      Burnbutton = new ButtonGroup();
-      Burnbutton.add(random);
-      Burnbutton.add(middle);
-      
-      
-      middle.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        model.initForest(); // reset the forest
-            }
-        });
-      
-      random.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        model.initForestRandom();
-            }
-        });
-      
-      view.add(random);
-      view.add(middle);
-      
-  }
-  
-  
-  
-  
   
   /**
    * Add text and button to controller panel

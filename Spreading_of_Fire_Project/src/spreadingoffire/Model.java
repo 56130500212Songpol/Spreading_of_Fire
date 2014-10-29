@@ -7,7 +7,6 @@
 import java.util.Random;
 
 public class Model {
-<<<<<<< HEAD
 
     private Cell[][] cell;                              //Assume every cells are on the component
     private View view;                                  //Painting on component 
@@ -123,70 +122,6 @@ public class Model {
                     }
                 }
             }
-=======
-  
-  private Cell[][] cell;                              //Assume every cells are on the component
-  private View view;                                  //Painting on component 
-  private Random random;                              //Random number compare with probCatch, probTree, probBurning
-  private int delay, numCell, positionX, positionY;
-  private double probCatch, probTree, probBurning;
-  private boolean checkCellCannotFire[][];            //check the cell can burn or not
-  
-  /**
-   * Constructor - create the model 
-   */
-  public Model(View view, int numCell, double probCatch, double probTree, double probBurning, int delay) {
-    this.view = view;
-    this.numCell = numCell;
-    this.probCatch = probCatch;
-    this.probTree = probTree;
-    this.probBurning = probBurning;
-    random = new Random();
-    this.delay = delay;
-    checkCellCannotFire = new boolean[numCell][numCell];
-  }
-  
-  public void initForestRandom() {
-    cell = new Cell[getNumCell()][getNumCell()];//create array of cell, size = number of cell x number of cell
-    for (int i = 0; i <= cell.length - 1; i++) {
-      for (int j = 0; j <= cell.length - 1; j++) {
-        cell[i][j] = new Cell(Cell.TREE);//assign every cell is a TREE
-        if (random.nextDouble() < probTree) {           //tree at site
-          if (random.nextDouble() < probBurning) {    //tree is burning
-            cell[i][j].setState(Cell.BURNING);
-          } else {                                    //tree is not buring
-            cell[i][j].setState(Cell.TREE);
-          }
-        } else {                                        //no tree at site
-          cell[i][j].setState(Cell.EMPTY);
-        }
-        if (i == 0 || i == cell.length - 1 || j == 0 || j == cell.length - 1) {
-          cell[i][j] = new Cell(0); //create absorbing boundary condition
-        }
-      }
-    }
-    int range = (cell.length-2 - 1) + 1;       
-    cell[(int)(Math.random() * range) + 1][(int)(Math.random() * range) + 1].setState(Cell.BURNING); //set the initial burning cell in the middle
-    view.updateView(cell); //update the color of each cell
-  }
-  
-  /** 
-   *  Create the forest(view) that contain many(cell) 
-   */
-  public void initForest() {
-    cell = new Cell[getNumCell()][getNumCell()];//create array of cell, size = number of cell x number of cell
-    for (int i = 0; i <= cell.length - 1; i++) {
-      for (int j = 0; j <= cell.length - 1; j++) {
-        cell[i][j] = new Cell(Cell.TREE);//assign every cell is a TREE
-        if (random.nextDouble() < probTree) {           //tree at site
-          if (random.nextDouble() < probBurning) {    //tree is burning
-            cell[i][j].setState(Cell.BURNING);
-          } else {                                    //tree is not buring
-            cell[i][j].setState(Cell.TREE);
-          }
-        } else {                                        //no tree at site
-          cell[i][j].setState(Cell.EMPTY);
->>>>>>> origin/master
         }
     }
 
