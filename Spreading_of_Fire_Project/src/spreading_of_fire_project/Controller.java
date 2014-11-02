@@ -16,7 +16,7 @@ import javax.swing.ButtonGroup;
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 30/10/2014
+ * @version 1/11/2014
  */
 public class Controller extends JPanel {
 
