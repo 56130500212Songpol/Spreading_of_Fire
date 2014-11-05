@@ -5,5 +5,7 @@ An introduction of simulation of spreading of fire
 **Aims**
 * Create an application that can simulate fire spreading in the forest. Use the knowledge related to GUI.
 * In application, user can customize value of variable and interact with application by using JButton, JRadiobutton, and JSlider.
+<br>
 **Author**
-OOSD Project Group 5
+<br>
+* OOSD Project Group 5
