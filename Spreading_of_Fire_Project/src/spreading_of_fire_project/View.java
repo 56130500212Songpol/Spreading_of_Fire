@@ -10,7 +10,7 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 30/10/2014
+ * @version 5/10/2014
  */
 public class View extends JPanel {
 
@@ -34,7 +34,7 @@ public class View extends JPanel {
         //do not see the border of each cell
         seeBorder = false;
 
-        setLayout(new FlowLayout(5, 655, 3));
+        setLayout(new FlowLayout(5, 655, 2));
     }
 
     /**

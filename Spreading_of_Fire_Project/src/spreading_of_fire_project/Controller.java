@@ -11,16 +11,17 @@ import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
 
 /**
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 1/11/2014
+ * @version 5/11/2014
  */
 public class Controller extends JPanel {
 
-    private JButton reset, auto, step, seeValue, seeBorder;
+    private JButton reset, auto, step, seeValue, seeBorder,help;
     private JSlider probCatchValue, probTreeValue, probBurningValue, delayValue;
     private JRadioButton tiny, small, medium, large, huge, world;
     private JRadioButton middle, random;
@@ -60,6 +61,7 @@ public class Controller extends JPanel {
         step = new JButton("Step-by-Step");
         seeValue = new JButton("See Value of Cell");
         seeBorder = new JButton("See Border of Cell");
+        help = new JButton("Help");
 
         step.addActionListener(new ActionListener() {
             @Override
@@ -87,10 +89,16 @@ public class Controller extends JPanel {
         reset.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (isRandom) {
+                    model.setRandomPositionX();
+                    model.setRandomPositionY();
+                }
                 view.setStep(0);
-                model = new Model(view, model.getNumCell(), model.getProbCatch(), model.getProbTree(),
-                        model.getProbBurning(), model.getDelay()); // create new forest
+                model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(), 
+                                  model.getProbCatch(), model.getProbTree(),model.getProbBurning(), 
+                                  model.getDelay()); // create new forest
                 model.initForest(); // reset the forest
+                isChangeSetting = false;
             }
         });
 
@@ -125,12 +133,46 @@ public class Controller extends JPanel {
                 }
             }
         });
+        
+        
+        help.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Yellow cell : EMPTY(value 0)\n"+
+                                                    "Green cell : TREE(value 1)\n"+
+                                                    "Red cell : BURNING(value 2)\n\n"+
+                                                    "Regrow Trees : Reset field\n"+
+                                                    "Auto Spread : Spread fire automatically\n"+
+                                                    "Step-by-Step : Spread fire step by step\n"+
+                                                    "See Value : See value of each cell\n"+
+                                                    "See Border : See border of each cell\n"+
+                                                    "Help : Decribe program\n\n"+
+                                                    "Choose Forest size :\n"+
+                                                    "-Tiny : 25x25 cells\n"+
+                                                    "-Small : 41x41 cells\n"+
+                                                    "-Medium : 63x63 cells\n"+
+                                                    "-Large : 79x79 cells\n"+
+                                                    "-Huge : 107x107 cells\n"+
+                                                    "-World : 650x650(Do not try if your PC slow) cells\n\n"+
+                                                    "Initial burn tree : \n"+
+                                                    "-Middle : Start spread from middle of forest\n"+
+                                                    "-Random : Start spread from random point in forest\n\n"+
+                                                    "Probability : \n"+
+                                                    "-ProbCatch : Probability that trees can catched fire\n"+
+                                                    "-ProbTree : Probability that trees are grown when begin simulation(density)\n"+
+                                                    "-ProbBurn : Probability that trees are burned when begin simulation\n\n"+
+                                                    "Others :\n"+
+                                                    "-Delay : Delay of animation\n"+
+                                                    "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
         view.add(reset);
         view.add(auto);
         view.add(step);
         view.add(seeValue);
         view.add(seeBorder);
+        view.add(help);
     }
 
     /**
