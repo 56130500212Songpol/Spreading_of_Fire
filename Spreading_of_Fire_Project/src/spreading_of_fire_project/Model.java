@@ -4,18 +4,19 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 1/11/2014
+ * @version 9/11/2014
  */
 import java.util.Random;
+import javax.swing.JOptionPane;
 
 public class Model {
 
     private Cell[][] cell;                              //Assume every cells are on the component
     private View view;                                  //Painting on component 
     private Random random;                              //Random number compare with probCatch, probTree, probBurning
-    private int delay, numCell, positionX, positionY;
-    private double probCatch, probTree, probBurning;
-    private boolean checkCellCannotFire[][];            //check the cell can burn or not
+    private int delay, numCell, positionX, positionY, stepToBurn[][];
+    private double probCatch, probTree, probBurning, probLightning;
+    private boolean checkCellCannotFire[][], checkCellBurnByLightning[][]; 
 
     /**
      * Constructor - create simulation of Spreading of Fire with default initial
@@ -26,19 +27,24 @@ public class Model {
      * @param probCatch
      * @param probTree
      * @param probBurning
+     * @param probLightning
      * @param delay
      */
-    public Model(View view, int numCell, double probCatch, double probTree, double probBurning, int delay) {
+    public Model(View view, int numCell, double probCatch, double probTree,
+            double probBurning, double probLightning, int delay) {
         this.view = view;
         this.numCell = numCell;
         this.probCatch = probCatch;
         this.probTree = probTree;
         this.probBurning = probBurning;
+        this.probLightning = probLightning;
         this.positionX = numCell / 2;                           //on the middle
         this.positionY = numCell / 2;                           //on the middle
         random = new Random();
         this.delay = delay;
         checkCellCannotFire = new boolean[numCell][numCell];
+        checkCellBurnByLightning = new boolean[numCell][numCell];
+        stepToBurn = new int[numCell][numCell];
     }
 
     /**
@@ -52,19 +58,24 @@ public class Model {
      * @param probCatch
      * @param probTree
      * @param probBurning
+     * @param probLightning
      * @param delay
      */
-    public Model(View view, int numCell, int positionX, int positionY, double probCatch, double probTree, double probBurning, int delay) {
+    public Model(View view, int numCell, int positionX, int positionY, double probCatch,
+            double probTree, double probBurning, double probLightning, int delay) {
         this.view = view;
         this.numCell = numCell;
         this.probCatch = probCatch;
         this.probTree = probTree;
         this.probBurning = probBurning;
+        this.probLightning = probLightning;
         this.positionX = positionX;                             //on customize position
         this.positionY = positionY;                             //on customize position
         random = new Random();
         this.delay = delay;
         checkCellCannotFire = new boolean[numCell][numCell];
+        checkCellBurnByLightning = new boolean[numCell][numCell];
+        stepToBurn = new int[numCell][numCell];
     }
 
     /**
@@ -76,6 +87,7 @@ public class Model {
         for (int i = 0; i <= cell.length - 1; i++) {
             for (int j = 0; j <= cell.length - 1; j++) {
                 cell[i][j] = new Cell(Cell.TREE);
+                stepToBurn[i][j] = 0;
                 if (random.nextDouble() < probTree) {           //tree at site
                     if (random.nextDouble() < probBurning) {    //tree is burning
                         cell[i][j].setState(Cell.BURNING);
@@ -104,7 +116,8 @@ public class Model {
     public void spreading() {
         for (int i = 1; i < cell.length - 1; i++) {
             for (int j = 1; j < cell[0].length - 1; j++) {
-                if (cell[i][j].getState() == Cell.BURNING && checkCellCannotFire[i][j] == false) {
+                if (cell[i][j].getState() == Cell.BURNING && checkCellCannotFire[i][j] == false
+                        && checkCellBurnByLightning[i][j] == false) {
                     cell[i][j].setState(0);
                     if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) {//spread to south tree
                         cell[i + 1][j].setState(2);
@@ -189,7 +202,16 @@ public class Model {
         try {
             if (!noFire()) {
                 spreading();
+                int x = (int) (Math.random() * (getNumCell() - 2) + 1);
+                int y = (int) (Math.random() * (getNumCell() - 2) + 1);
+                if (cell[x][y].getState() == Cell.TREE && random.nextDouble() < getProbCatch() * getProbLightning()) {
+                    // if random less than probtree * problightning, tree catched fire
+                    cell[x][y].setState(2);
+                    checkCellCannotFire[x][y] = true;
+                    checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+                }
             }
+            resetStepToBurn(); // count fire step, and burn tree that was struck by lightning
             resetCheck();
             view.updateView(cell);
             Thread.sleep(2);
@@ -206,6 +228,35 @@ public class Model {
     public void applySpread() {
         while (!noFire()) {
             spread();
+            int x = (int) (Math.random() * (getNumCell() - 2) + 1);
+            int y = (int) (Math.random() * (getNumCell() - 2) + 1);
+            if (cell[x][y].getState() == Cell.TREE && random.nextDouble() < getProbCatch() * getProbLightning()) {
+                // if random less than probtree * problightning, tree catched fire
+                cell[x][y].setState(2);
+                checkCellCannotFire[x][y] = true;
+                checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+            }
+            resetStepToBurn(); // count fire step, and burn tree that was struck by lightning
+        }
+    }
+
+    /**
+     * Reset the step of every cell to false **Do not reset on absorbing
+     * boundary condition**
+     *
+     */
+    public void resetStepToBurn() {
+        for (int i = 1; i < checkCellCannotFire.length - 1; i++) {
+            for (int j = 1; j < checkCellCannotFire.length - 1; j++) {
+                if (checkCellBurnByLightning[i][j] == true) {
+                    stepToBurn[i][j]++;
+                    // if cell has 5 step, reset to 0
+                    if (stepToBurn[i][j] - 5 == 0) {
+                        checkCellBurnByLightning[i][j] = false;
+                        stepToBurn[i][j] = 0;
+                    }
+                }
+            }
         }
     }
 
@@ -349,5 +400,39 @@ public class Model {
         return probBurning;
     }
 
-}
+    /**
+     * Set the value of probability lightning
+     *
+     * @param probLightning
+     */
+    public void setProbLightning(double probLightning) {
+        this.probLightning = probLightning;
+    }
 
+    /**
+     * Get the value of probability lightning
+     *
+     * @return probLightning
+     */
+    public double getProbLightning() {
+        return probLightning;
+    }
+
+    /**
+     * Set burning tree on X and Y coordinate, cannot set on absorbing boundary
+     * condition**
+     *
+     * @param x
+     * @param y
+     */
+    public void setXsetY(int x, int y) {
+        if (cell[x][y].getState() == Cell.TREE) {
+            cell[x][y].setState(Cell.BURNING);
+        } else if (cell[x][y].getState() == Cell.BURNING) {
+            cell[x][y].setState(Cell.TREE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Cannot set burning to empty cell!", "Caution!", JOptionPane.ERROR_MESSAGE);
+        }
+        view.updateView(cell);
+    }
+}
