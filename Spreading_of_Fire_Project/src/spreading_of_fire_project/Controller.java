@@ -170,7 +170,7 @@ public class Controller extends JPanel {
                         + "-ProbBurn : Probability that trees are burned when begin simulation\n"
                         + "-ProbLightning : Probability that trees are burned by lightning strike\n"
                         + "**If tree was striked by lightning, tree will spread after 5 steps itearation**\n\n"
-                        + "Set burning position X and Y : set position of burning cell according to forest size\n\n"
+                        + "Set burning tree on  X and Y coordinate : set burning tree by input x and y coordinate\n\n"
                         + "Others :\n"
                         + "-Delay : Delay of animation\n"
                         + "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
@@ -463,11 +463,11 @@ public class Controller extends JPanel {
     }
 
     /**
-     * Add text field that use for set burning position X and Y coordinate
+     * Add text field that use for set burning tree on X and Y coordinate
      *
      */
     private void addTextFieldBurnCell() {
-        setXY = new JLabel("Set burning position X and Y coordinate :");
+        setXY = new JLabel("Set burning tree on X and Y coordinate :");
         labelX = new JLabel("X :");
         labelY = new JLabel("Y :");
         buttonArea3 = new JPanel();
@@ -484,7 +484,7 @@ public class Controller extends JPanel {
                 try {
                     model.setXsetY(Integer.parseInt(X.getText()), Integer.parseInt(Y.getText()));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Input X and Y follow the size of forest :\n"
+                    JOptionPane.showMessageDialog(null, "Input X and Y coordibate according to the size of forest :\n"
                             + "-Tiny : 25x25 cells\n"
                             + "-Small : 41x41 cells\n"
                             + "-Medium : 63x63 cells\n"
