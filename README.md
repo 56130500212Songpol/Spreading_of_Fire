@@ -12,6 +12,7 @@ An introduction of simulation of spreading of fire
 * javax.swing.JFrame
 * javax.swing.JPanel
 * javax.swing.JLabel
+* javax.swing.JTextField
 * javax.swing.JOptionPane
 * javax.swing.JButtonGroup
 * javax.swing.JButton
