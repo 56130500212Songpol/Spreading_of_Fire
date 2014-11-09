@@ -1,5 +1,6 @@
 package spreading_of_fire_project;
 
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,23 +13,26 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 5/11/2014
+ * @version 9/11/2014
  */
 public class Controller extends JPanel {
 
-    private JButton reset, auto, step, seeValue, seeBorder,help;
-    private JSlider probCatchValue, probTreeValue, probBurningValue, delayValue;
+    private JButton reset, auto, step, seeValue, seeBorder, help, sendXY;
+    private JSlider probCatchValue, probTreeValue, probBurningValue, probLightningValue, delayValue;
     private JRadioButton tiny, small, medium, large, huge, world;
     private JRadioButton middle, random;
+    private JTextField X, Y;
     private ButtonGroup group, group2;
-    private JLabel size, probCatch, probTree, probBurning, delay, position,
-            how, probCatchShow, probTreeShow, probBurningShow, delayShow;
-    private JPanel buttonArea;
+    private JLabel size, probCatch, probTree, probBurning, probLightning, delay, position,
+            how, probCatchShow, probTreeShow, probBurningShow, probLightningShow, delayShow,
+            setXY, labelX, labelY;
+    private JPanel buttonArea, buttonArea2, buttonArea3, buttonArea4;
     private View view;
     private Model model;
     private boolean isRandom = false, isMiddle = false, isChangeSetting = false,
@@ -39,13 +43,14 @@ public class Controller extends JPanel {
      */
     public Controller() {
         view = new View();
-        model = new Model(view, 25, 1.0, 1.0, 0.0, 100); //make simulation of field
+        model = new Model(view, 25, 1.0, 1.0, 0.0, 0.0, 100); //make simulation of field
         model.initForest();
         setLayout(new GridLayout());
         addInteractButton(); // add reset button, and auto button,step button to controller panel
         addForestSizeRadioButton(); // add resize forest button, tiny, small, medium, large, huge, and world
         addInitialBurningTreeRadioButton(); // add initial burning tree button, random or middle
         addProbSlider(); // add probCatch slider, probTree slider, probBuring slider, and delay slider to controller panel
+        addTextFieldBurnCell(); // add set burning position X and Y 
         add(view); // add view to controller panel
     }
 
@@ -54,13 +59,16 @@ public class Controller extends JPanel {
      *
      */
     private void addInteractButton() {
+        buttonArea4 = new JPanel();
+        buttonArea4.setLayout(new GridLayout(3, 2, 5, 5));
+
         how = new JLabel("**Please setting and regrow trees**");
         view.add(how);
         reset = new JButton("Regrow Trees");
         auto = new JButton("Auto Spread");
         step = new JButton("Step-by-Step");
-        seeValue = new JButton("See Value of Cell");
-        seeBorder = new JButton("See Border of Cell");
+        seeValue = new JButton("See Value");
+        seeBorder = new JButton("See Border");
         help = new JButton("Help");
 
         step.addActionListener(new ActionListener() {
@@ -94,9 +102,9 @@ public class Controller extends JPanel {
                     model.setRandomPositionY();
                 }
                 view.setStep(0);
-                model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(), 
-                                  model.getProbCatch(), model.getProbTree(),model.getProbBurning(), 
-                                  model.getDelay()); // create new forest
+                model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                        model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                        model.getProbLightning(), model.getDelay()); // create new forest
                 model.initForest(); // reset the forest
                 isChangeSetting = false;
             }
@@ -133,46 +141,49 @@ public class Controller extends JPanel {
                 }
             }
         });
-        
-        
+
         help.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Yellow cell : EMPTY(value 0)\n"+
-                                                    "Green cell : TREE(value 1)\n"+
-                                                    "Red cell : BURNING(value 2)\n\n"+
-                                                    "Regrow Trees : Reset field\n"+
-                                                    "Auto Spread : Spread fire automatically\n"+
-                                                    "Step-by-Step : Spread fire step by step\n"+
-                                                    "See Value : See value of each cell\n"+
-                                                    "See Border : See border of each cell\n"+
-                                                    "Help : Decribe program\n\n"+
-                                                    "Choose Forest size :\n"+
-                                                    "-Tiny : 25x25 cells\n"+
-                                                    "-Small : 41x41 cells\n"+
-                                                    "-Medium : 63x63 cells\n"+
-                                                    "-Large : 79x79 cells\n"+
-                                                    "-Huge : 107x107 cells\n"+
-                                                    "-World : 650x650(Do not try if your PC slow) cells\n\n"+
-                                                    "Initial burn tree : \n"+
-                                                    "-Middle : Start spread from middle of forest\n"+
-                                                    "-Random : Start spread from random point in forest\n\n"+
-                                                    "Probability : \n"+
-                                                    "-ProbCatch : Probability that trees can catched fire\n"+
-                                                    "-ProbTree : Probability that trees are grown when begin simulation(density)\n"+
-                                                    "-ProbBurn : Probability that trees are burned when begin simulation\n\n"+
-                                                    "Others :\n"+
-                                                    "-Delay : Delay of animation\n"+
-                                                    "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Yellow cell : EMPTY(value 0)\n"
+                        + "Green cell : TREE(value 1)\n"
+                        + "Red cell : BURNING(value 2)\n\n"
+                        + "Regrow Trees : Reset field\n"
+                        + "Auto Spread : Spread fire automatically\n"
+                        + "Step-by-Step : Spread fire step by step\n"
+                        + "See Value : See value of each cell\n"
+                        + "See Border : See border of each cell\n"
+                        + "Help : Decribe program\n\n"
+                        + "Choose Forest size :\n"
+                        + "-Tiny : 25x25 cells\n"
+                        + "-Small : 41x41 cells\n"
+                        + "-Medium : 63x63 cells\n"
+                        + "-Large : 79x79 cells\n"
+                        + "-Huge : 107x107 cells\n"
+                        + "-World : 650x650 cells (Do not try if your PC slow)\n\n"
+                        + "Initial burn tree : \n"
+                        + "-Middle : Start spread from middle of forest\n"
+                        + "-Random : Start spread from random point in forest\n\n"
+                        + "Probability : \n"
+                        + "-ProbCatch : Probability that trees can catched fire\n"
+                        + "-ProbTree : Probability that trees are grown when begin simulation(density)\n"
+                        + "-ProbBurn : Probability that trees are burned when begin simulation\n"
+                        + "-ProbLightning : Probability that trees are burned by lightning strike\n"
+                        + "**If tree was striked by lightning, tree will spread after 5 steps itearation**\n\n"
+                        + "Set burning position X and Y : set position of burning cell according to forest size\n\n"
+                        + "Others :\n"
+                        + "-Delay : Delay of animation\n"
+                        + "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        view.add(reset);
-        view.add(auto);
-        view.add(step);
-        view.add(seeValue);
-        view.add(seeBorder);
-        view.add(help);
+        buttonArea4.add(reset);
+        buttonArea4.add(auto);
+        buttonArea4.add(step);
+        buttonArea4.add(seeValue);
+        buttonArea4.add(seeBorder);
+        buttonArea4.add(help);
+        view.add(buttonArea4);
     }
 
     /**
@@ -183,6 +194,8 @@ public class Controller extends JPanel {
         size = new JLabel("Choose Forest size :");
         view.add(size);
         group = new ButtonGroup();
+        buttonArea2 = new JPanel();
+        buttonArea2.setLayout(new GridLayout(2, 3));
 
         tiny = new JRadioButton("Tiny");
         tiny.addActionListener(new ActionListener() {
@@ -300,12 +313,13 @@ public class Controller extends JPanel {
         group.add(large);
         group.add(huge);
         group.add(world);
-        view.add(tiny);
-        view.add(small);
-        view.add(medium);
-        view.add(large);
-        view.add(huge);
-        view.add(world);
+        buttonArea2.add(tiny);
+        buttonArea2.add(small);
+        buttonArea2.add(medium);
+        buttonArea2.add(large);
+        buttonArea2.add(huge);
+        buttonArea2.add(world);
+        view.add(buttonArea2);
     }
 
     /**
@@ -411,6 +425,24 @@ public class Controller extends JPanel {
         );
         view.add(probBurningValue);
 
+        probLightning = new JLabel("Choose Forest Probability Lightning :");
+        probLightningShow = new JLabel("ProbLightning : 0 %");
+        view.add(probLightning);
+        view.add(probLightningShow);
+        probLightningValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 0); // slide on horizontal
+        probLightningValue.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (probLightningValue.getValueIsAdjusting()) { // if slide bar
+                    probLightningShow.setText("ProbLightning : " + (double) probLightningValue.getValue() + " %");// show the value of probLightning
+                    model.setProbLightning((double) probLightningValue.getValue() / 100); // set probability lightning equal value of slider
+                }
+            }
+
+        }
+        );
+        view.add(probLightningValue);
+
         delay = new JLabel("Choose Forest Animation delay :");
         delayShow = new JLabel("Delay : 100 ms");
         view.add(delay);
@@ -429,5 +461,46 @@ public class Controller extends JPanel {
         );
         view.add(delayValue);
     }
-}
 
+    /**
+     * Add text field that use for set burning position X and Y coordinate
+     *
+     */
+    private void addTextFieldBurnCell() {
+        setXY = new JLabel("Set burning position X and Y coordinate :");
+        labelX = new JLabel("X :");
+        labelY = new JLabel("Y :");
+        buttonArea3 = new JPanel();
+        buttonArea3.setLayout(new FlowLayout());
+
+        X = new JTextField(4);
+
+        Y = new JTextField(4);
+
+        sendXY = new JButton("Submit");
+        sendXY.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    model.setXsetY(Integer.parseInt(X.getText()), Integer.parseInt(Y.getText()));
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Input X and Y follow the size of forest :\n"
+                            + "-Tiny : 25x25 cells\n"
+                            + "-Small : 41x41 cells\n"
+                            + "-Medium : 63x63 cells\n"
+                            + "-Large : 79x79 cells\n"
+                            + "-Huge : 107x107 cells\n"
+                            + "-World : 650x650 cells", "Caution!", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        buttonArea3.add(labelX);
+        buttonArea3.add(X);
+        buttonArea3.add(labelY);
+        buttonArea3.add(Y);
+        buttonArea3.add(sendXY);
+        view.add(setXY);
+        view.add(buttonArea3);
+    }
+}
