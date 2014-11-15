@@ -1,5 +1,6 @@
 package spreading_of_fire_project;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -12,45 +13,45 @@ import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 
 /**
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 9/11/2014
+ * @version 15/11/2014
  */
 public class Controller extends JPanel {
 
-    private JButton reset, auto, step, seeValue, seeBorder, help, sendXY;
-    private JSlider probCatchValue, probTreeValue, probBurningValue, probLightningValue, delayValue;
-    private JRadioButton tiny, small, medium, large, huge, world;
-    private JRadioButton middle, random;
-    private JTextField X, Y;
+    private JButton reset, auto, step, seeValue, help;
+    private JSlider probCatchValue, probTreeValue, probBurningValue, probLightningValue, delayValue,
+            windSpeed;
+    private JRadioButton tiny, small, medium, large, huge, world, north, east, west, south;
+    private JCheckBox lightning;
     private ButtonGroup group, group2;
-    private JLabel size, probCatch, probTree, probBurning, probLightning, delay, position,
+    private JLabel size, probCatch, probTree, probBurning, probLightning, delay,
             how, probCatchShow, probTreeShow, probBurningShow, probLightningShow, delayShow,
-            setXY, labelX, labelY;
-    private JPanel buttonArea, buttonArea2, buttonArea3, buttonArea4;
+            windSpeedText;
+    private JPanel buttonArea2, buttonArea4;
     private View view;
     private Model model;
-    private boolean isRandom = false, isMiddle = false, isChangeSetting = false,
-            isOnWorld = false;
+    public static boolean clickAuto;
+    public static boolean isAuto = false;
 
     /**
      * Constructor - create controller panel
      */
     public Controller() {
-        view = new View();
-        model = new Model(view, 25, 1.0, 1.0, 0.0, 0.0, 100); //make simulation of field
+        view = new View(24);
+        model = new Model(view, 25, 1.0, 1.0, 0.0, 0.5, 100, "No", Model.NONE, false); //make simulation of field
         model.initForest();
         setLayout(new GridLayout());
         addInteractButton(); // add reset button, and auto button,step button to controller panel
         addForestSizeRadioButton(); // add resize forest button, tiny, small, medium, large, huge, and world
-        addInitialBurningTreeRadioButton(); // add initial burning tree button, random or middle
         addProbSlider(); // add probCatch slider, probTree slider, probBuring slider, and delay slider to controller panel
-        addTextFieldBurnCell(); // add set burning position X and Y 
+        addWindController(); // add wind controller to panel
+        addLightningController(); //add lightning strike to panel
         add(view); // add view to controller panel
     }
 
@@ -60,7 +61,7 @@ public class Controller extends JPanel {
      */
     private void addInteractButton() {
         buttonArea4 = new JPanel();
-        buttonArea4.setLayout(new GridLayout(3, 2, 5, 5));
+        buttonArea4.setLayout(new GridLayout(3, 2, 5, 2));
 
         how = new JLabel("**Please setting and regrow trees**");
         view.add(how);
@@ -68,7 +69,6 @@ public class Controller extends JPanel {
         auto = new JButton("Auto Spread");
         step = new JButton("Step-by-Step");
         seeValue = new JButton("See Value");
-        seeBorder = new JButton("See Border");
         help = new JButton("Help");
 
         step.addActionListener(new ActionListener() {
@@ -81,64 +81,55 @@ public class Controller extends JPanel {
         auto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            model.applySpread(); // Auto spread the fire 
-                        } catch (Exception e) {
+                isAuto = true;
+                if (!clickAuto) {
+                    model.setStop(false);
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                model.applySpread(); // Auto spread the fire 
+                            } catch (Exception e) {
+                            }
                         }
-                    }
-                });
-                t.start();
+                    });
+                    t.start();
+                    auto.setText("Stop Spread"); // while auto spread, change to stop spread button
+                    clickAuto = true;
+                } else {
+                    model.setStop(true);
+                    clickAuto = false;
+                    auto.setText("Auto Spread"); // When finished auto spread, change back to auto spread
+                }
             }
         });
 
         reset.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
+                if (!isAuto) {
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the burned cell in the forest
+                    auto.setText("Auto Spread"); // change to auto spread button
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                view.setStep(0);
-                model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
-                        model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
-                        model.getProbLightning(), model.getDelay()); // create new forest
-                model.initForest(); // reset the forest
-                isChangeSetting = false;
             }
         });
 
         seeValue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!isOnWorld) {
-                    if (view.isSeeValue() == false) {
-                        view.setSeeValue(true);
-                    } else if (view.isSeeValue() == true) {
-                        view.setSeeValue(false);
-                    }
-                    if (!isChangeSetting) {
-                        view.repaint();
-                    }
+                if (!view.isSeeValue()) {
+                    view.setSeeValue(true); // show value of every cell
+                } else {
+                    view.setSeeValue(false); // hide the value of every cell
                 }
-            }
-        });
-
-        seeBorder.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (!isOnWorld) {
-                    if (view.isSeeBorder() == false) {
-                        view.setSeeBorder(true);
-                    } else if (view.isSeeBorder() == true) {
-                        view.setSeeBorder(false);
-                    }
-                    if (!isChangeSetting) {
-                        view.repaint();
-                    }
-                }
+                view.repaint(); // repaint the forest
             }
         });
 
@@ -160,17 +151,13 @@ public class Controller extends JPanel {
                         + "-Medium : 63x63 cells\n"
                         + "-Large : 79x79 cells\n"
                         + "-Huge : 107x107 cells\n"
-                        + "-World : 650x650 cells (Do not try if your computer slow)\n\n"
-                        + "Initial burn tree : \n"
-                        + "-Middle : Start spread from middle of forest\n"
-                        + "-Random : Start spread from random point in forest\n\n"
+                        + "-World : 650x650 cells (Do not try if your PC slow)\n\n"
                         + "Probability : \n"
                         + "-ProbCatch : Probability that trees can catched fire\n"
                         + "-ProbTree : Probability that trees are grown when begin simulation(density)\n"
                         + "-ProbBurn : Probability that trees are burned when begin simulation\n"
                         + "-ProbLightning : Probability that trees are burned by lightning strike\n"
                         + "**If tree was struck by lightning, tree will spread after 5 steps itearation**\n\n"
-                        + "Set burning tree on  X and Y coordinate : set burning tree by input x and y coordinate\n\n"
                         + "Others :\n"
                         + "-Delay : Delay of animation\n"
                         + "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
@@ -181,14 +168,20 @@ public class Controller extends JPanel {
         buttonArea4.add(auto);
         buttonArea4.add(step);
         buttonArea4.add(seeValue);
-        buttonArea4.add(seeBorder);
         buttonArea4.add(help);
-        view.add(buttonArea4);
+        view.add(buttonArea4); // add button to panel
     }
 
     /**
-     * Add text and radiobutton to resize the field
-     *
+     * Add text and JRadioButton about resize the field //1.tiny - have 25 trees
+     * including absorb boundary and 24 cell size both width and height
+     * //2.small - have 41 trees including absorb boundary and 15 cell size both
+     * width and height //3.medium - have 63 trees including absorb boundary and
+     * 10 cell size both width and height //4.large - have 79 trees including
+     * absorb boundary and 8 cell size both width and height //5.tiny - have 107
+     * trees including absorb boundary and 6 cell size both width and height
+     * //6.tiny - have 649 tree including absorb boundary and 1 cell size both
+     * width and height
      */
     private void addForestSizeRadioButton() {
         size = new JLabel("Choose Forest size :");
@@ -197,116 +190,144 @@ public class Controller extends JPanel {
         buttonArea2 = new JPanel();
         buttonArea2.setLayout(new GridLayout(2, 3));
 
-        tiny = new JRadioButton("Tiny");
+        tiny = new JRadioButton("Tiny"); // set forest size 25x25 cell including absorb boundary
         tiny.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(24);
-                model.setNumCell(25);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : TINY"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(24); // set the pixel of every cell to 24 unit
+                    model.setNumCell(25); // set the number of cell to 25 cells 
+                    model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                isChangeSetting = true;
-                isOnWorld = false;
             }
         });
 
-        small = new JRadioButton("Small");
+        small = new JRadioButton("Small"); // set forest size 41x41 cell including absorb boundary
         small.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(15);
-                model.setNumCell(41);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : SMALL"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(15); // set the pixel of every cell to 15 unit
+                    model.setNumCell(41); // set the number of cell to 41 cells
+                    model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                isChangeSetting = true;
-                isOnWorld = false;
             }
         });
 
-        medium = new JRadioButton("Medium");
+        medium = new JRadioButton("Medium"); // set forest size 63x63 cell including absorb boundary
         medium.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(10);
-                model.setNumCell(63);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : MEDIUM"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(10); // set the pixel of every cell to 10 unit
+                    model.setNumCell(63); // set the number of cell to 63 cells
+                    model.setPositionXonMiddle();//set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                isChangeSetting = true;
-                isOnWorld = false;
             }
         });
 
-        large = new JRadioButton("Large");
+        large = new JRadioButton("Large"); // set forest size 79x79 cell including absorb boundary
         large.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(8);
-                model.setNumCell(79);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : LARGE"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(8); // set the pixel of every cell to 8 unit
+                    model.setNumCell(79); // set the number of cell to 79 cells
+                    model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                isChangeSetting = true;
-                isOnWorld = false;
             }
         });
 
-        huge = new JRadioButton("Huge");
+        huge = new JRadioButton("Huge"); // set forest size 107x107 cell including absorb boundary
         huge.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(6);
-                model.setNumCell(107);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : HUGE"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(6); // set the pixel of every cell to 6 unit
+                    model.setNumCell(107); // set the number of cell to 107 cells
+                    model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                isChangeSetting = true;
-                isOnWorld = false;
             }
         });
 
-        world = new JRadioButton("World");
+        world = new JRadioButton("World"); // set forest size 649x649 cell including absorb boundary
         world.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view.setPixel(1);
-                model.setNumCell(650);
-                if (isRandom) {
-                    model.setRandomPositionX();
-                    model.setRandomPositionY();
-                } else {
-                    model.setPositionXonMiddle();
+                if (!isAuto) { // if auto, user cannot resize the forest
+                    size.setText("Choose Forest size : WORLD"); // Show the current forest size that user select
+                    auto.setText("Auto Spread");
+                    view.setPixel(1);  // set the pixel of every cell to 1 unit
+                    model.setNumCell(649); // set the number of cell to 649 cells
+                    model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
+                    view.setStep(0); // reset the value of step
+                    view.setTree(0); // reset the value of tree in the forest
+                    view.setBurn(0); // reset the value of burned tree in the forest
+                    model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
+                            model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
+                            model.getProbLightning(), model.getDelay(), model.getDirection(),
+                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                    model.initForest(); // reset the forest
                 }
-                view.setSeeBorder(false);
-                view.setSeeValue(false);
-                isChangeSetting = true;
-                isOnWorld = true;
             }
         });
-
+        // group all of the JRadioButton together
         group.add(tiny);
         group.add(small);
         group.add(medium);
@@ -319,67 +340,25 @@ public class Controller extends JPanel {
         buttonArea2.add(large);
         buttonArea2.add(huge);
         buttonArea2.add(world);
-        view.add(buttonArea2);
+        view.add(buttonArea2); // add all JRadioButton to panel
     }
 
     /**
-     * Add text and radiobutton to set the initial burning tree
-     *
-     */
-    private void addInitialBurningTreeRadioButton() {
-        position = new JLabel("Select position of initial burn tree :");
-        view.add(position);
-        buttonArea = new JPanel();
-        buttonArea.setLayout(new GridLayout(1, 2));
-        group2 = new ButtonGroup();
-
-        middle = new JRadioButton("Middle Tree");
-        random = new JRadioButton("Random tree");
-
-        middle.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isRandom = false;
-                isMiddle = true;
-                model.setPositionXonMiddle();
-                model.setPositionYonMiddle();
-                System.out.println(model.getPositionX());
-                System.out.println(model.getPositionY());
-            }
-        });
-        random.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                isRandom = true;
-                isMiddle = false;
-                model.setRandomPositionX();
-                model.setRandomPositionY();
-                System.out.println(model.getPositionX());
-                System.out.println(model.getPositionY());
-            }
-        });
-
-        group2.add(middle);
-        group2.add(random);
-        buttonArea.add(middle);
-        buttonArea.add(random);
-        view.add(buttonArea);
-    }
-
-    /**
-     * Add slider to controller panel
-     *
+     * Add slider to controller panel //1.Probability of tree catching fire from
+     * the neighbor tree //2.Probability of cell might be tree or empty when
+     * start simulation //3.Probability of tree might be burn when start
+     * simulation
      */
     private void addProbSlider() {
         probCatch = new JLabel("Choose Forest Probability Catching Fire :");
-        probCatchShow = new JLabel("ProbCatch : 100 %");
+        probCatchShow = new JLabel("ProbCatch : 100 %"); // set the default of text following the default value of probCatch
         view.add(probCatch);
         view.add(probCatchShow);
         probCatchValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 100); // slide on horizontal
         probCatchValue.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (probCatchValue.getValueIsAdjusting()) { // if slide bar
+                if (probCatchValue.getValueIsAdjusting()) { // if sliding this bar
                     probCatchShow.setText("ProbCatch : " + (double) probCatchValue.getValue() + " %"); // show the value of probCatch
                     model.setProbCatch((double) probCatchValue.getValue() / 100); // set probability catching fire equal value of slider
                 }
@@ -387,17 +366,17 @@ public class Controller extends JPanel {
 
         }
         );
-        view.add(probCatchValue);
+        view.add(probCatchValue); // add this JSlider to panel
 
         probTree = new JLabel("Choose Forest Probability Tree density :");
-        probTreeShow = new JLabel("ProbTree : 100 %");
+        probTreeShow = new JLabel("ProbTree : 100 %"); // set the default of text following the default value of probTree
         view.add(probTree);
         view.add(probTreeShow);
         probTreeValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 100); // slide on horizontal
         probTreeValue.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (probTreeValue.getValueIsAdjusting()) { // if slide bar
+                if (probTreeValue.getValueIsAdjusting()) { // if sliding this bar
                     probTreeShow.setText("ProbTree : " + (double) probTreeValue.getValue() + " %"); // show the value of probTree
                     model.setProbTree((double) probTreeValue.getValue() / 100); // set probability tree density equal value of slider
                 }
@@ -405,17 +384,17 @@ public class Controller extends JPanel {
 
         }
         );
-        view.add(probTreeValue);
+        view.add(probTreeValue); // add this JSlider to panel
 
         probBurning = new JLabel("Choose Forest Probability Tree burning :");
-        probBurningShow = new JLabel("ProbBurning : 0 %");
+        probBurningShow = new JLabel("ProbBurning : 0 %"); // set the default of text following the default value of probBurn
         view.add(probBurning);
         view.add(probBurningShow);
         probBurningValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 0); // slide on horizontal
         probBurningValue.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (probBurningValue.getValueIsAdjusting()) { // if slide bar
+                if (probBurningValue.getValueIsAdjusting()) { // if sliding this bar
                     probBurningShow.setText("ProbBurning : " + (double) probBurningValue.getValue() + " %");// show the value of probBurning
                     model.setProbBurning((double) probBurningValue.getValue() / 100); // set probability burning tree equal value of slider
                 }
@@ -423,35 +402,17 @@ public class Controller extends JPanel {
 
         }
         );
-        view.add(probBurningValue);
-
-        probLightning = new JLabel("Choose Forest Probability Lightning :");
-        probLightningShow = new JLabel("ProbLightning : 0 %");
-        view.add(probLightning);
-        view.add(probLightningShow);
-        probLightningValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 0); // slide on horizontal
-        probLightningValue.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (probLightningValue.getValueIsAdjusting()) { // if slide bar
-                    probLightningShow.setText("ProbLightning : " + (double) probLightningValue.getValue() + " %");// show the value of probLightning
-                    model.setProbLightning((double) probLightningValue.getValue() / 100); // set probability lightning equal value of slider
-                }
-            }
-
-        }
-        );
-        view.add(probLightningValue);
+        view.add(probBurningValue); // add this JSlider to panel
 
         delay = new JLabel("Choose Forest Animation delay :");
-        delayShow = new JLabel("Delay : 100 ms");
+        delayShow = new JLabel("Delay : 100 ms"); // set the default of text following the default value of delay
         view.add(delay);
         view.add(delayShow);
-        delayValue = new JSlider(JSlider.HORIZONTAL, 2, 1000, 100); // slide on horizontal
+        delayValue = new JSlider(JSlider.HORIZONTAL, 1, 1000, 100); // slide on horizontal
         delayValue.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                if (delayValue.getValueIsAdjusting()) { // if slide bar
+                if (delayValue.getValueIsAdjusting()) { // if sliding this bar
                     delayShow.setText("Delay : " + delayValue.getValue() + " ms"); // show the value of delay
                     model.setDelay(delayValue.getValue()); // set delay equal value of slider
                 }
@@ -459,48 +420,144 @@ public class Controller extends JPanel {
 
         }
         );
-        view.add(delayValue);
+        view.add(delayValue); // add this JSlider to panel
     }
 
     /**
-     * Add text field that use for set burning tree on X and Y coordinate
-     *
+     * Add the wind controller that can control direction and speed of wind
+     * ///***direction*** 1.N = North 2.E = East 3.W = West 4.S = South
+     * ///***speed*** 1.NONE = no wind 2.LOW = have low speed wind 3.HIGH = have
+     * high speed wind
      */
-    private void addTextFieldBurnCell() {
-        setXY = new JLabel("Set burning tree on X and Y coordinate :");
-        labelX = new JLabel("X :");
-        labelY = new JLabel("Y :");
-        buttonArea3 = new JPanel();
-        buttonArea3.setLayout(new FlowLayout());
+    private void addWindController() {
+        JLabel wind = new JLabel("Wind Controller : ");
+        windSpeedText = new JLabel("Wind speed : NONE"); // default of the wind speed is none
+        north = new JRadioButton("N");
+        east = new JRadioButton("E");
+        west = new JRadioButton("W");
+        south = new JRadioButton("S");
 
-        X = new JTextField(4);
+        JPanel areaCen1 = new JPanel(new FlowLayout());
+        JPanel areaCen2 = new JPanel(new FlowLayout());
+        JPanel area = new JPanel(new GridLayout(1, 2));
 
-        Y = new JTextField(4);
+        windSpeed = new JSlider(JSlider.HORIZONTAL, 0, 2, 0); // slide only horizontal min = 0(LOW) max = 2(HIGH)
+        windSpeed.setMinorTickSpacing(1); // change only 1 value
+        windSpeed.setMajorTickSpacing(1);
+        windSpeed.setPaintTicks(true);
+        windSpeed.setPaintLabels(true);
 
-        sendXY = new JButton("Submit");
-        sendXY.addActionListener(new ActionListener() {
+        group2 = new ButtonGroup();
+        buttonArea2 = new JPanel();
+        buttonArea2.setLayout(new BorderLayout(10, 2));
+
+        north.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    model.setXsetY(Integer.parseInt(X.getText()), Integer.parseInt(Y.getText()));
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Input X and Y coordibate according to the size of forest :\n"
-                            + "-Tiny : 25x25 cells\n"
-                            + "-Small : 41x41 cells\n"
-                            + "-Medium : 63x63 cells\n"
-                            + "-Large : 79x79 cells\n"
-                            + "-Huge : 107x107 cells\n"
-                            + "-World : 650x650 cells", "Caution!", JOptionPane.ERROR_MESSAGE);
+                model.setDirection("N"); // Click on north JRadioButton, set the wind in the simulation to north
+            }
+        });
+
+        east.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setDirection("E"); // Click on east JRadioButton, set the wind in the simulation to east
+            }
+        });
+
+        west.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setDirection("W"); // Click on west JRadioButton, set the wind in the simulation to west
+            }
+        });
+
+        south.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                model.setDirection("S"); // Click on south JRadioButton, set the wind in the simulation to south
+            }
+        });
+
+        windSpeed.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (windSpeed.getValueIsAdjusting()) { // if sliding wind JSlider
+                    if (windSpeed.getValue() == 0) { // if sliding to 0
+                        windSpeedText.setText("Wind speed : NONE"); // set the the of wind spreed to none 
+                    } else if (windSpeed.getValue() == 1) { // if sliding to 1
+                        windSpeedText.setText("Wind speed : LOW"); // set the the of wind spreed to low
+                    } else { // if sliding to 2
+                        windSpeedText.setText("Wind speed : HIGH"); // set the the of wind spreed to high
+                    }
+                    model.setWindSpeed(windSpeed.getValue()); // set the vlue of wind speed by value of wind speed JSlider                }
                 }
             }
         });
 
-        buttonArea3.add(labelX);
-        buttonArea3.add(X);
-        buttonArea3.add(labelY);
-        buttonArea3.add(Y);
-        buttonArea3.add(sendXY);
-        view.add(setXY);
-        view.add(buttonArea3);
+        areaCen1.add(north);
+        areaCen2.add(south);
+
+        // group all of JRadioButton together
+        group2.add(north);
+        group2.add(east);
+        group2.add(west);
+        group2.add(south);
+
+        buttonArea2.add(areaCen1, BorderLayout.NORTH);
+        buttonArea2.add(east, BorderLayout.EAST);
+        buttonArea2.add(west, BorderLayout.WEST);
+        buttonArea2.add(areaCen2, BorderLayout.SOUTH);
+
+        area.add(wind);
+        area.add(buttonArea2);
+
+        view.add(area); // add wind controller to panel
+        view.add(windSpeedText);
+        view.add(windSpeed);
+    }
+
+    /**
+     * Add JCheckBox for enable or disable lightning strike and JSlider that use
+     * for change the value of probability of lightning strike
+     */
+    private void addLightningController() {
+        lightning = new JCheckBox("Lightning : Disable"); // default of the lightning function is disable
+        lightning.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (lightning.isSelected()) { // if select this check box, change to enable lightning
+                    lightning.setText("Lightning : Enable");
+                    view.add(probLightning); // add lightning control to panel
+                    view.add(probLightningShow);
+                    view.add(probLightningValue);
+                    model.setLightningStatus(true); // enable lightning strike in the forest
+                } else { // if did not select this check box, change to disable lightning
+                    lightning.setText("Lightning : Disable");
+                    view.remove(probLightning); // remove lightning control from panel
+                    view.remove(probLightningShow);
+                    view.remove(probLightningValue);
+                    model.setLightningStatus(false); // disable lightning strike in the forest
+                }
+                view.repaint();
+            }
+
+        }
+        );
+        probLightning = new JLabel("Choose Forest Probability Lightning :");
+        probLightningShow = new JLabel("ProbLightning : 50 %"); // set the default of text following the default value of delay 
+        probLightningValue = new JSlider(JSlider.HORIZONTAL, 0, 100, 50); // slide on horizontal
+        probLightningValue.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (probLightningValue.getValueIsAdjusting()) { // if sliding this bar
+                    probLightningShow.setText("ProbLightning : " + (double) probLightningValue.getValue() + " %");// show the value of probLightning
+                    model.setProbLightning((double) probLightningValue.getValue() / 100); // set probability lightning equal value of slider
+                }
+            }
+
+        }
+        );
+        view.add(lightning); // add lightning controller to panel 
     }
 }
