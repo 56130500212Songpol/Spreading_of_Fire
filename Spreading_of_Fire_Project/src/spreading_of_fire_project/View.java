@@ -10,31 +10,32 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 5/10/2014
+ * @version 15/11/2014
  */
 public class View extends JPanel {
 
     private Cell[][] cell;
-    private int step, pixel;
-    private boolean seeValue, seeBorder;
+    private int step, pixel, burn, tree;
+    private boolean seeValue;
     public static final Color EMPTY_COLOR = new Color(255, 255, 0);
-    public static final Color TREE_COLOR = new Color(0, 180, 0);
+    public static final Color TREE_COLOR = new Color(0, 200, 0);
     public static final Color BURNING_COLOR = new Color(255, 0, 0);
+    public static final Color LIGHTNING_COLOR = new Color(0, 0, 0);
     public static final Color VALUE_COLOR = new Color(0, 0, 0);
-    public static final Font STEP_FONT = new Font("TimesRoman", Font.PLAIN, 20);
+    public static final Font DEFAULT_FONT = new Font("Dialog", Font.BOLD, 13);
 
     /**
      * Constructor - create the view
+     * @param pixel
      */
-    public View() {
+    public View(int pixel) {
         //the default size of cell
-        pixel = 24;
+        this.pixel = pixel;
         //do not see value of each cell
         seeValue = false;
-        //do not see the border of each cell
-        seeBorder = false;
 
-        setLayout(new FlowLayout(5, 655, 2));
+        setLayout(new FlowLayout(5, 655, 1));
+
     }
 
     /**
@@ -55,8 +56,6 @@ public class View extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setFont(STEP_FONT);
-        g.drawString("Step : " + getStep(), 770, 640);
         g.setFont(new Font("TimesRoman", Font.PLAIN, pixel / 2)); //set the font of value
         for (int i = 0; i < cell.length; i++) {
             for (int j = 0; j < cell.length; j++) {
@@ -67,6 +66,8 @@ public class View extends JPanel {
                         g.setColor(EMPTY_COLOR); //if cell is empty cell, set color to yellow
                     } else if (cell[i][j].getState() == Cell.TREE) {
                         g.setColor(TREE_COLOR); //if cell is tree cell, set color to green
+                    } else if (cell[i][j].getState() == Cell.LIGHTNING) {
+                        g.setColor(LIGHTNING_COLOR); //if cell is 
                     } else {
                         g.setColor(BURNING_COLOR); //if cell is burning cell, set color to red
                     }
@@ -81,14 +82,20 @@ public class View extends JPanel {
                             } else {
                                 g.drawString("2", x + getPixel() - 14, y + getPixel() - 6);//if cell is burning cell, set string to 2
                             }
+                            g.drawRect(x, y, getPixel(), getPixel());
                         }
-                    }
-                    if (isSeeBorder()) { //if user set the seeEdge to true, it will show border of each cell
-                        g.drawRect(x, y, getPixel(), getPixel()); //draw rectangular for each cell
                     }
                 }
             }
         }
+        g.setColor(BURNING_COLOR);
+        g.setFont(DEFAULT_FONT);
+        // compute the percent burned trees
+        g.drawString("Forest burned : " + (double) ((int) ((double) getBurn() /(double) getTree() * 10000)) / 100 + " %", 658, 625);
+        g.setColor(VALUE_COLOR);
+        g.setFont(DEFAULT_FONT);
+        // show the value of step
+        g.drawString("Step : " + getStep(), 810, 625);
     }
 
     /**
@@ -107,24 +114,6 @@ public class View extends JPanel {
      */
     public int getPixel() {
         return this.pixel;
-    }
-
-    /**
-     * Check the boolean of see border
-     *
-     * @return seeBorder
-     */
-    public boolean isSeeBorder() {
-        return seeBorder;
-    }
-
-    /**
-     * Set the boolean see border
-     *
-     * @param seeBorder
-     */
-    public void setSeeBorder(boolean seeBorder) {
-        this.seeBorder = seeBorder;
     }
 
     /**
@@ -169,6 +158,58 @@ public class View extends JPanel {
      */
     public int getStep() {
         return this.step;
+    }
+
+    /**
+     * Get number of burned tree
+     *
+     * @return burn
+     */
+    public int getBurn() {
+        return burn;
+    }
+
+    /**
+     * Set number of burned tree
+     *
+     */
+    public void setBurn() {
+        this.burn++;
+    }
+
+    /**
+     * Set number of burned tree
+     *
+     * @param burn
+     */
+    public void setBurn(int burn) {
+        this.burn = burn;
+    }
+
+    /**
+     * Set number of tree
+     *
+     * @return tree
+     */
+    public int getTree() {
+        return tree;
+    }
+
+    /**
+     * Set number of tree
+     *
+     */
+    public void setTree() {
+        this.tree++;
+    }
+
+    /**
+     * Set number of tree
+     *
+     * @param tree
+     */
+    public void setTree(int tree) {
+        this.tree = tree;
     }
 
 }
