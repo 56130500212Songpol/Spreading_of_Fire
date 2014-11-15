@@ -7,7 +7,7 @@ import javax.swing.JFrame;
  * The visualization class of project(Frame class)
  *
  * @author OOSD Project Group 5
- * @version 30/10/2014
+ * @version 15/10/2014
  */
 public class Spreading_of_Fire extends JFrame {
 
@@ -18,7 +18,7 @@ public class Spreading_of_Fire extends JFrame {
         Container contentPane = this.getContentPane();
         controller = new Controller(); // create new Controller
         setResizable(false); // cannot resize frame
-        setSize(900, 683); // set size of frame
+        setSize(905, 680); // set size of frame
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         contentPane.add(controller); //add controller to frame
         setVisible(true);
