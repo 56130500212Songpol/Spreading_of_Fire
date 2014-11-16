@@ -4,7 +4,7 @@ An introduction of simulation of spreading of fire
 
 **Aims**
 * Create an application that can simulate fire spreading in the forest. Use the knowledge related to GUI and Array 2D.
-* In application, user can customize value of variable and interact with application by using JButton, JTextField, JRadiobutton, JSlider, and JCheckBox.
+* In application, user can customize value of variable and interact with application by using JButton, JRadiobutton, JSlider, and JCheckBox.
 
 <br>
 **Methodologies**
@@ -13,7 +13,6 @@ An introduction of simulation of spreading of fire
 * javax.swing.JFrame
 * javax.swing.JPanel
 * javax.swing.JLabel
-* javax.swing.JTextField
 * javax.swing.JOptionPane
 * javax.swing.JButtonGroup
 * javax.swing.JButton
