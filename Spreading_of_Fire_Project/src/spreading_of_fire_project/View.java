@@ -10,22 +10,24 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 15/11/2014
+ * @version 17/11/2014
  */
 public class View extends JPanel {
 
     private Cell[][] cell;
     private int step, pixel, burn, tree;
-    private boolean seeValue;
+    private double avgBurn = 0.0;
+    private boolean seeValue, isTen;
     public static final Color EMPTY_COLOR = new Color(255, 255, 0);
     public static final Color TREE_COLOR = new Color(0, 200, 0);
     public static final Color BURNING_COLOR = new Color(255, 0, 0);
     public static final Color LIGHTNING_COLOR = new Color(0, 0, 0);
     public static final Color VALUE_COLOR = new Color(0, 0, 0);
-    public static final Font DEFAULT_FONT = new Font("Dialog", Font.BOLD, 13);
+    public static final Font DEFAULT_FONT = new Font("Dialog", Font.BOLD, 12);
 
     /**
      * Constructor - create the view
+     *
      * @param pixel
      */
     public View(int pixel) {
@@ -91,7 +93,11 @@ public class View extends JPanel {
         g.setColor(BURNING_COLOR);
         g.setFont(DEFAULT_FONT);
         // compute the percent burned trees
-        g.drawString("Forest burned : " + (double) ((int) ((double) getBurn() /(double) getTree() * 10000)) / 100 + " %", 658, 625);
+        if (isTen) { // if run 10 times
+            g.drawString("Average burned : " + getAvgBurn() + " %", 658, 625); // show average percentage
+        } else { // if run one times
+            g.drawString("Forest burned : " + getAvgBurn()+ " %", 658, 625); // show percentage
+        }
         g.setColor(VALUE_COLOR);
         g.setFont(DEFAULT_FONT);
         // show the value of step
@@ -187,7 +193,7 @@ public class View extends JPanel {
     }
 
     /**
-     * Set number of tree
+     * Get number of tree
      *
      * @return tree
      */
@@ -210,6 +216,50 @@ public class View extends JPanel {
      */
     public void setTree(int tree) {
         this.tree = tree;
+    }
+
+    /**
+     * Get the percentage of average tree burn for 10 times spread
+     *
+     * @return percentage of tree burn
+     */
+    public double getAvgBurn() {
+        return (double) ((int) ((double) getBurn() / (double) getTree() * 10000)) / 100;
+    }
+
+    /**
+     * Set number of avgBurn
+     *
+     * @param avgBurn
+     */
+    public void setAvgBurn(double avgBurn) {
+        this.avgBurn += avgBurn;
+    }
+    
+    /**
+     * Set number of avgBurn to 0
+     *
+     */
+    public void setAvgBurn() {
+        this.avgBurn = 0;
+    }
+
+    /**
+     * Get boolean of isTen
+     *
+     * @return 
+     */
+    public boolean isIsTen() {
+        return isTen;
+    }
+
+    /**
+     * Set boolean of isTen
+     *
+     * @param isTen
+     */
+    public void setIsTen(boolean isTen) {
+        this.isTen = isTen;
     }
 
 }
