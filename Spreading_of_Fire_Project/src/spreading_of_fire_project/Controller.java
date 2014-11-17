@@ -141,9 +141,9 @@ public class Controller extends JPanel {
                         + "Red cell : BURNING(value 2)\n\n"
                         + "Regrow Trees : Reset field\n"
                         + "Auto Spread : Spread fire automatically\n"
+                        + "Stop Spread : Stop spread fire(Enable after users pressed 'Auto spread' or 'Regrow Trees')\n"
                         + "Step-by-Step : Spread fire step by step\n"
-                        + "See Value : See value of each cell\n"
-                        + "See Border : See border of each cell\n"
+                        + "See Value : See both value and border of each cell\n"
                         + "Help : Decribe program\n\n"
                         + "Choose Forest size :\n"
                         + "-Tiny : 25x25 cells\n"
@@ -151,16 +151,20 @@ public class Controller extends JPanel {
                         + "-Medium : 63x63 cells\n"
                         + "-Large : 79x79 cells\n"
                         + "-Huge : 107x107 cells\n"
-                        + "-World : 650x650 cells (Do not try if your PC slow)\n\n"
+                        + "-World : 649x649 cells (Do not try if your PC slow)\n\n"
                         + "Probability : \n"
                         + "-ProbCatch : Probability that trees can catched fire\n"
-                        + "-ProbTree : Probability that trees are grown when begin simulation(density)\n"
-                        + "-ProbBurn : Probability that trees are burned when begin simulation\n"
-                        + "-ProbLightning : Probability that trees are burned by lightning strike\n"
+                        + "-ProbTree : Probability that trees occur when begin simulation(tree density)\n"
+                        + "-ProbBurn : Probability that trees was burned when begin simulation\n"
+                        + "-ProbLightning : Probability that trees might burn by lightning strike(Enable lightning strike)\n"
                         + "**If tree was struck by lightning, tree will spread after 5 steps itearation**\n\n"
+                        + "Wind Controller : \n"
+                        + "-Direction : N = North, E = East, W = West, S = South\n"
+                        + "-Speed : 0 = No wind, 1 = Low speed, 2 = High speed\n\n"
                         + "Others :\n"
                         + "-Delay : Delay of animation\n"
-                        + "-Step : Step count the spread of fire in forest\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
+                        + "-Step : Step count the spread of fire in forest\n"
+                        + "-Forest burned : Percentage of tree burn after spread fire\n", "Help?", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
