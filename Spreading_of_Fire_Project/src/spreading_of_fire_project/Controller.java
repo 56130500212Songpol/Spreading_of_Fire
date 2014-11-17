@@ -20,19 +20,19 @@ import javax.swing.JOptionPane;
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 15/11/2014
+ * @version 17/11/2014
  */
 public class Controller extends JPanel {
 
-    private JButton reset, auto, step, seeValue, help;
+    private JButton reset, auto, step, seeValue, help, autoTen;
     private JSlider probCatchValue, probTreeValue, probBurningValue, probLightningValue, delayValue,
             windSpeed;
-    private JRadioButton tiny, small, medium, large, huge, world, north, east, west, south;
+    private JRadioButton tiny, small, medium, large, huge, world, north, east, west, south, vary;
     private JCheckBox lightning;
     private ButtonGroup group, group2;
     private JLabel size, probCatch, probTree, probBurning, probLightning, delay,
             how, probCatchShow, probTreeShow, probBurningShow, probLightningShow, delayShow,
-            windSpeedText;
+            windSpeedText, windDirection;
     private JPanel buttonArea2, buttonArea4;
     private View view;
     private Model model;
@@ -44,7 +44,7 @@ public class Controller extends JPanel {
      */
     public Controller() {
         view = new View(24);
-        model = new Model(view, 25, 1.0, 1.0, 0.0, 0.5, 100, "No", Model.NONE, false); //make simulation of field
+        model = new Model(view, 25, 1.0, 1.0, 0.0, 0.5, 100, "No", Model.NONE, false, false); //make simulation of field
         model.initForest();
         setLayout(new GridLayout());
         addInteractButton(); // add reset button, and auto button,step button to controller panel
@@ -67,6 +67,7 @@ public class Controller extends JPanel {
         view.add(how);
         reset = new JButton("Regrow Trees");
         auto = new JButton("Auto Spread");
+        autoTen = new JButton("Auto Ten");
         step = new JButton("Step-by-Step");
         seeValue = new JButton("See Value");
         help = new JButton("Help");
@@ -104,18 +105,40 @@ public class Controller extends JPanel {
             }
         });
 
+        autoTen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                isAuto = true;
+                view.setIsTen(true); // Spread 10 times
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            model.applySpread10times();// Auto spread the fire 10 times
+                        } catch (Exception e) {
+                        }
+                    }
+                });
+                t.start();
+                autoTen.setEnabled(false); // Disable this button
+            }
+        });
+
         reset.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isAuto) {
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the burned cell in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     auto.setText("Auto Spread"); // change to auto spread button
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -141,6 +164,7 @@ public class Controller extends JPanel {
                         + "Red cell : BURNING(value 2)\n\n"
                         + "Regrow Trees : Reset field\n"
                         + "Auto Spread : Spread fire automatically\n"
+                        + "Auto Ten : Spread fire automatically 10 times\n"
                         + "Stop Spread : Stop spread fire(Enable after users pressed 'Auto spread' or 'Regrow Trees')\n"
                         + "Step-by-Step : Spread fire step by step\n"
                         + "See Value : See both value and border of each cell\n"
@@ -159,7 +183,7 @@ public class Controller extends JPanel {
                         + "-ProbLightning : Probability that trees might burn by lightning strike(Enable lightning strike)\n"
                         + "**If tree was struck by lightning, tree will spread after 5 steps itearation**\n\n"
                         + "Wind Controller : \n"
-                        + "-Direction : N = North, E = East, W = West, S = South\n"
+                        + "-Direction : North, East, West, South, Vary\n"
                         + "-Speed : 0 = No wind, 1 = Low speed, 2 = High speed\n\n"
                         + "Others :\n"
                         + "-Delay : Delay of animation\n"
@@ -170,6 +194,7 @@ public class Controller extends JPanel {
 
         buttonArea4.add(reset);
         buttonArea4.add(auto);
+        buttonArea4.add(autoTen);
         buttonArea4.add(step);
         buttonArea4.add(seeValue);
         buttonArea4.add(help);
@@ -205,13 +230,16 @@ public class Controller extends JPanel {
                     model.setNumCell(25); // set the number of cell to 25 cells 
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -228,13 +256,16 @@ public class Controller extends JPanel {
                     model.setNumCell(41); // set the number of cell to 41 cells
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -251,13 +282,16 @@ public class Controller extends JPanel {
                     model.setNumCell(63); // set the number of cell to 63 cells
                     model.setPositionXonMiddle();//set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -274,13 +308,16 @@ public class Controller extends JPanel {
                     model.setNumCell(79); // set the number of cell to 79 cells
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -297,13 +334,16 @@ public class Controller extends JPanel {
                     model.setNumCell(107); // set the number of cell to 107 cells
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -320,13 +360,16 @@ public class Controller extends JPanel {
                     model.setNumCell(649); // set the number of cell to 649 cells
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
-                    view.setStep(0); // reset the value of step
+                    //view.setStep(0); // reset the value of step
+                    autoTen.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
+                    view.setIsTen(false);
+                    view.setAvgBurn();
                     model = new Model(view, model.getNumCell(), model.getPositionX(), model.getPositionY(),
                             model.getProbCatch(), model.getProbTree(), model.getProbBurning(),
                             model.getProbLightning(), model.getDelay(), model.getDirection(),
-                            model.getWindSpeed(), model.isLightningStatus()); // create new forest
+                            model.getWindSpeed(), model.isLightningStatus(), model.isIsVary()); // create new forest
                     model.initForest(); // reset the forest
                 }
             }
@@ -435,15 +478,18 @@ public class Controller extends JPanel {
      */
     private void addWindController() {
         JLabel wind = new JLabel("Wind Controller : ");
+        windDirection = new JLabel("Direction : " + model.getDirection());
         windSpeedText = new JLabel("Wind speed : NONE"); // default of the wind speed is none
         north = new JRadioButton("N");
         east = new JRadioButton("E");
         west = new JRadioButton("W");
         south = new JRadioButton("S");
+        vary = new JRadioButton("VR");
 
-        JPanel areaCen1 = new JPanel(new FlowLayout());
-        JPanel areaCen2 = new JPanel(new FlowLayout());
+        JPanel areaCen1 = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel areaCen2 = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JPanel area = new JPanel(new GridLayout(1, 2));
+        JPanel area2 = new JPanel(new GridLayout(2, 1));
 
         windSpeed = new JSlider(JSlider.HORIZONTAL, 0, 2, 0); // slide only horizontal min = 0(LOW) max = 2(HIGH)
         windSpeed.setMinorTickSpacing(1); // change only 1 value
@@ -453,33 +499,45 @@ public class Controller extends JPanel {
 
         group2 = new ButtonGroup();
         buttonArea2 = new JPanel();
-        buttonArea2.setLayout(new BorderLayout(10, 2));
+        buttonArea2.setLayout(new BorderLayout());
 
         north.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.setDirection("N"); // Click on north JRadioButton, set the wind in the simulation to north
+                model.setDirection("North"); // Click on north JRadioButton, set the wind in the simulation to north
+                windDirection.setText("Direction : " + model.getDirection());
             }
         });
 
         east.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.setDirection("E"); // Click on east JRadioButton, set the wind in the simulation to east
+                model.setDirection("East"); // Click on east JRadioButton, set the wind in the simulation to east
+                windDirection.setText("Direction : " + model.getDirection());
             }
         });
 
         west.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.setDirection("W"); // Click on west JRadioButton, set the wind in the simulation to west
+                model.setDirection("West"); // Click on west JRadioButton, set the wind in the simulation to west
+                windDirection.setText("Direction : " + model.getDirection());
             }
         });
 
         south.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                model.setDirection("S"); // Click on south JRadioButton, set the wind in the simulation to south
+                model.setDirection("South"); // Click on south JRadioButton, set the wind in the simulation to south
+                windDirection.setText("Direction : " + model.getDirection());
+            }
+        });
+
+        vary.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    model.setIsVary(true); // Click on vary JRadioButton, wind in simulation vary
+                    windDirection.setText("Direction : Vary");
             }
         });
 
@@ -488,11 +546,11 @@ public class Controller extends JPanel {
             public void stateChanged(ChangeEvent e) {
                 if (windSpeed.getValueIsAdjusting()) { // if sliding wind JSlider
                     if (windSpeed.getValue() == 0) { // if sliding to 0
-                        windSpeedText.setText("Wind speed : NONE"); // set the the of wind spreed to none 
+                        windSpeedText.setText("Wind speed : NONE "); // set the the of wind spreed to none 
                     } else if (windSpeed.getValue() == 1) { // if sliding to 1
-                        windSpeedText.setText("Wind speed : LOW"); // set the the of wind spreed to low
+                        windSpeedText.setText("Wind speed : LOW "); // set the the of wind spreed to low
                     } else { // if sliding to 2
-                        windSpeedText.setText("Wind speed : HIGH"); // set the the of wind spreed to high
+                        windSpeedText.setText("Wind speed : HIGH "); // set the the of wind spreed to high
                     }
                     model.setWindSpeed(windSpeed.getValue()); // set the vlue of wind speed by value of wind speed JSlider                }
                 }
@@ -507,13 +565,18 @@ public class Controller extends JPanel {
         group2.add(east);
         group2.add(west);
         group2.add(south);
+        group2.add(vary);
 
         buttonArea2.add(areaCen1, BorderLayout.NORTH);
         buttonArea2.add(east, BorderLayout.EAST);
         buttonArea2.add(west, BorderLayout.WEST);
         buttonArea2.add(areaCen2, BorderLayout.SOUTH);
+        buttonArea2.add(vary, BorderLayout.CENTER);
 
-        area.add(wind);
+        area2.add(wind);
+        area2.add(windDirection);
+
+        area.add(area2);
         area.add(buttonArea2);
 
         view.add(area); // add wind controller to panel
