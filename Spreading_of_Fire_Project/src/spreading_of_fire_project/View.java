@@ -10,18 +10,21 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 17/11/2014
+ * @version 19/11/2014
  */
 public class View extends JPanel {
 
     private Cell[][] cell;
     private int step, pixel, burn, tree;
-    private double avgBurn = 0.0;
     private boolean seeValue, isTen;
     public static final Color EMPTY_COLOR = new Color(255, 255, 0);
-    public static final Color TREE_COLOR = new Color(0, 200, 0);
-    public static final Color BURNING_COLOR = new Color(255, 0, 0);
-    public static final Color LIGHTNING_COLOR = new Color(0, 0, 0);
+    public static final Color YOUNG_COLOR = new Color(128, 255, 0);
+    public static final Color ADULT_COLOR = new Color(60, 204, 0);
+    public static final Color OLD_COLOR = new Color(30, 189, 10);
+    public static final Color TREE_COLOR = new Color(10, 150, 0);
+    public static final Color BURN_COLOR = new Color(255, 178, 20);
+    public static final Color BURNING_COLOR = new Color(255, 10, 10);
+    public static final Color LIGHTNING_COLOR = new Color(0,0,255);
     public static final Color VALUE_COLOR = new Color(0, 0, 0);
     public static final Font DEFAULT_FONT = new Font("Dialog", Font.BOLD, 12);
 
@@ -36,7 +39,7 @@ public class View extends JPanel {
         //do not see value of each cell
         seeValue = false;
 
-        setLayout(new FlowLayout(5, 655, 1));
+        setLayout(new FlowLayout(5, 655, 0));
 
     }
 
@@ -66,8 +69,16 @@ public class View extends JPanel {
                     int y = (j + 1) * getPixel(); //position y of ecah cell
                     if (cell[i][j].getState() == Cell.EMPTY) {
                         g.setColor(EMPTY_COLOR); //if cell is empty cell, set color to yellow
+                    } else if (cell[i][j].getState() == Cell.YOUNG) {
+                        g.setColor(YOUNG_COLOR); //if cell is tree cell, set color to green
+                    } else if (cell[i][j].getState() == Cell.ADULT) {
+                        g.setColor(ADULT_COLOR); //if cell is tree cell, set color to green
+                    } else if (cell[i][j].getState() == Cell.OLD) {
+                        g.setColor(OLD_COLOR); //if cell is tree cell, set color to green
                     } else if (cell[i][j].getState() == Cell.TREE) {
                         g.setColor(TREE_COLOR); //if cell is tree cell, set color to green
+                    } else if (cell[i][j].getState() == Cell.BURN) {
+                        g.setColor(BURN_COLOR); //if cell is tree cell, set color to green
                     } else if (cell[i][j].getState() == Cell.LIGHTNING) {
                         g.setColor(LIGHTNING_COLOR); //if cell is 
                     } else {
@@ -79,10 +90,18 @@ public class View extends JPanel {
                         if (cell.length == 25) {
                             if (cell[i][j].getState() == Cell.EMPTY) {
                                 g.drawString("0", x + getPixel() - 14, y + getPixel() - 6);//if cell is empty cell, set string to 0
-                            } else if (cell[i][j].getState() == Cell.TREE) {
+                            } else if (cell[i][j].getState() == Cell.YOUNG) {
                                 g.drawString("1", x + getPixel() - 14, y + getPixel() - 6);//if cell is tree cell, set string to 1
+                            } else if (cell[i][j].getState() == Cell.ADULT) {
+                                g.drawString("2", x + getPixel() - 14, y + getPixel() - 6);//if cell is tree cell, set string to 1
+                            } else if (cell[i][j].getState() == Cell.OLD) {
+                                g.drawString("3", x + getPixel() - 14, y + getPixel() - 6);//if cell is tree cell, set string to 1
+                            } else if (cell[i][j].getState() == Cell.TREE) {
+                                g.drawString("4", x + getPixel() - 14, y + getPixel() - 6);//if cell is tree cell, set string to 1
+                            } else if (cell[i][j].getState() == Cell.BURN) {
+                                g.drawString("5", x + getPixel() - 14, y + getPixel() - 6);//if cell is tree cell, set string to 1
                             } else {
-                                g.drawString("2", x + getPixel() - 14, y + getPixel() - 6);//if cell is burning cell, set string to 2
+                                g.drawString("6", x + getPixel() - 14, y + getPixel() - 6);//if cell is burning cell, set string to 2
                             }
                             g.drawRect(x, y, getPixel(), getPixel());
                         }
@@ -96,7 +115,7 @@ public class View extends JPanel {
         if (isTen) { // if run 10 times
             g.drawString("Average burned : " + getAvgBurn() + " %", 658, 625); // show average percentage
         } else { // if run one times
-            g.drawString("Forest burned : " + getAvgBurn()+ " %", 658, 625); // show percentage
+            g.drawString("Forest burned : " + getAvgBurn() + " %", 658, 625); // show percentage
         }
         g.setColor(VALUE_COLOR);
         g.setFont(DEFAULT_FONT);
@@ -226,28 +245,11 @@ public class View extends JPanel {
     public double getAvgBurn() {
         return (double) ((int) ((double) getBurn() / (double) getTree() * 10000)) / 100;
     }
-
-    /**
-     * Set number of avgBurn
-     *
-     * @param avgBurn
-     */
-    public void setAvgBurn(double avgBurn) {
-        this.avgBurn += avgBurn;
-    }
     
-    /**
-     * Set number of avgBurn to 0
-     *
-     */
-    public void setAvgBurn() {
-        this.avgBurn = 0;
-    }
-
     /**
      * Get boolean of isTen
      *
-     * @return 
+     * @return
      */
     public boolean isIsTen() {
         return isTen;
