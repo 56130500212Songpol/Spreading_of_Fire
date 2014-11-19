@@ -88,6 +88,7 @@ public class Controller extends JPanel {
                 autoTen.setEnabled(false);
                 if (!clickAuto) {
                     model.setStop(false);
+                    step.setEnabled(false);
                     Thread t = new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -102,6 +103,7 @@ public class Controller extends JPanel {
                     clickAuto = true;
                 } else {
                     model.setStop(true);
+                    step.setEnabled(true);
                     clickAuto = false;
                     auto.setText("Auto Spread"); // When finished auto spread, change back to auto spread
                 }
@@ -134,7 +136,9 @@ public class Controller extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (!isAuto) {
                     //view.setStep(0); // reset the value of step
+                    if(!model.isIsRegrow()){
                     autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
