@@ -4,7 +4,7 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 18/11/2014
+ * @version 19/11/2014
  */
 import java.util.Random;
 
