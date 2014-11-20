@@ -4,9 +4,10 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 19/11/2014
+ * @version 20/11/2014
  */
 import java.util.Random;
+import javax.swing.JOptionPane;
 
 public class Model {
 
@@ -14,7 +15,7 @@ public class Model {
     private View view;                                  //Painting on component 
     private Random random;                              //Random number compare with probCatch, probTree, probBurning
     private int windSpeed, delay, numCell, positionX, positionY, stepToBurn[][], stepToNotBurn[][],
-            age[][], previousState[][];
+            previousState[][];
     private double probCatch, probTree, probBurning, probLightning;
     private boolean isRegrow, isVary, stop, lightningStatus, checkCellCannotFire[][],
             checkCellBurnByLightning[][], checkCellNotBurnByLightning[][], checkCellNotEmptyByBurn[][];
@@ -63,7 +64,6 @@ public class Model {
         stepToBurn = new int[numCell][numCell];
         stepToNotBurn = new int[numCell][numCell];
         previousState = new int[numCell][numCell];
-        age = new int[numCell][numCell];
     }
 
     /**
@@ -110,7 +110,6 @@ public class Model {
         stepToBurn = new int[numCell][numCell];
         stepToNotBurn = new int[numCell][numCell];
         previousState = new int[numCell][numCell];
-        age = new int[numCell][numCell];
     }
 
     /**
@@ -353,7 +352,9 @@ public class Model {
                 }
             }
         }
-        view.setStep(); //count step of spreading
+        if (!isRegrow) {
+            view.setStep(); //count step of spreading
+        }
     }
 
     /**
@@ -380,7 +381,8 @@ public class Model {
             for (int j = 1; j < getNumCell() - 1; j++) {
                 if (cell[i][j].getState() == Cell.YOUNG || cell[i][j].getState() == Cell.BURN
                         || cell[i][j].getState() == Cell.LIGHTNING || cell[i][j].getState() == Cell.ADULT
-                        || cell[i][j].getState() == Cell.OLD || cell[i][j].getState() == Cell.BURNING) { // still have fire in forest or young trees
+                        || cell[i][j].getState() == Cell.OLD || cell[i][j].getState() == Cell.BURNING
+                        || isRegrow) { // still have fire in forest or young trees
                     return false;
                 }
             }
@@ -866,27 +868,15 @@ public class Model {
         for (int i = 1; i < cell.length - 1; i++) {
             for (int j = 1; j < cell.length - 1; j++) {
                 try {
-                    if (cell[i][j].getState() == Cell.EMPTY && !checkCellNotEmptyByBurn[i][j]) { // if tree burned
-                        age[i][j]++;
-                        if (age[i][j] == 22) {
-                            cell[i][j].setState(); // regrow tree to young tree
-                        }
-                    } else if (cell[i][j].getState() == Cell.YOUNG) { // if tree is young
-                        age[i][j]++;
-                        if (age[i][j] == 44) {
-                            cell[i][j].setState(); // evolve to adult tree
-                        }
-                    } else if (cell[i][j].getState() == Cell.ADULT) { // if tree is adult
-                        age[i][j]++;
-                        if (age[i][j] == 66) {
-                            cell[i][j].setState(); // evolve to old tree
-                        }
-                    } else if (cell[i][j].getState() == Cell.OLD) { // if tree is old
-                        age[i][j]++;
-                        if (age[i][j] == 88) {
-                            cell[i][j].setState(); // evolve to tree(can catch fire)
-                            age[i][j] = 0;
-                        }
+                    int ran = random.nextInt(600);
+                    if (cell[i][j].getState() == Cell.EMPTY && !checkCellNotEmptyByBurn[i][j] && ran <= 25) { // if tree burned
+                        cell[i][j].setState(); // regrow tree to young tree
+                    } else if (cell[i][j].getState() == Cell.YOUNG && ran > 25 && ran <= 50) { // if tree is young
+                        cell[i][j].setState(); // evolve to adult tree
+                    } else if (cell[i][j].getState() == Cell.ADULT && ran > 50 && ran <= 75) { // if tree is adult
+                        cell[i][j].setState(); // evolve to old tree
+                    } else if (cell[i][j].getState() == Cell.OLD && ran > 75 && ran <= 100) { // if tree is old
+                        cell[i][j].setState(); // evolve to tree(can catch fire)
                     }
                 } catch (Exception e) {
 
@@ -931,5 +921,21 @@ public class Model {
      */
     public void setIsRegrow(boolean isRegrow) {
         this.isRegrow = isRegrow;
+    }
+
+    /**
+     * Set position of burning tree
+     *
+     * @param x
+     * @param y
+     */
+    public void setXsetY(int x, int y) {
+        try {
+            if (cell[x][y].getState() != Cell.EMPTY) { // cannot burn tree on empty cell
+                cell[x][y].setState(5);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Please insert row and coloum in " + numCell + " x " + numCell + " cells", "Caution!", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
