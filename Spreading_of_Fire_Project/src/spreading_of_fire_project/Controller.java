@@ -10,6 +10,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.JButton;
 import javax.swing.JSlider;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ButtonGroup;
@@ -20,20 +21,21 @@ import javax.swing.JOptionPane;
  * The controller class of project which contain buttons and sliders
  *
  * @author OOSD Project Group 5
- * @version 18/11/2014
+ * @version 20/11/2014
  */
 public class Controller extends JPanel {
 
-    private JButton reset, auto, step, seeValue, help, autoTen;
+    private JButton reset, auto, step, seeValue, help, autoTen, submit;
     private JSlider probCatchValue, probTreeValue, probBurningValue, probLightningValue, delayValue,
             windSpeed;
     private JRadioButton tiny, small, medium, large, huge, world, north, east, west, south, vary;
     private JCheckBox lightning, regrow;
     private ButtonGroup group, group2;
+    private JTextField X, Y;
     private JLabel size, probCatch, probTree, probBurning, probLightning, delay,
             how, probCatchShow, probTreeShow, probBurningShow, probLightningShow, delayShow,
-            windSpeedText, windDirection;
-    private JPanel buttonArea2, buttonArea4;
+            windSpeedText, windDirection, setXY;
+    private JPanel buttonArea2, buttonArea4, buttonArea3;
     private View view;
     private Model model;
     public static boolean clickAuto;
@@ -51,6 +53,7 @@ public class Controller extends JPanel {
         addForestSizeRadioButton(); // add resize forest button, tiny, small, medium, large, huge, and world
         addProbSlider(); // add probCatch slider, probTree slider, probBuring slider, and delay slider to controller panel
         addWindController(); // add wind controller to panel
+        addSetXSetY(); // add set burning tree
         addRegrow(); // add regrow auto to panel
         addLightningController(); //add lightning strike to panel
         add(view); // add view to controller panel
@@ -136,8 +139,8 @@ public class Controller extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (!isAuto) {
                     //view.setStep(0); // reset the value of step
-                    if(!model.isIsRegrow()){
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
@@ -244,7 +247,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -272,7 +277,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -300,7 +307,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle();//set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -328,7 +337,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -356,7 +367,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -384,7 +397,9 @@ public class Controller extends JPanel {
                     model.setPositionXonMiddle(); //set the position of initial burning tree to the middle of the forest
                     model.setPositionYonMiddle();
                     //view.setStep(0); // reset the value of step
-                    autoTen.setEnabled(true);
+                    if (!model.isIsRegrow()) {
+                        autoTen.setEnabled(true);
+                    }
                     auto.setEnabled(true);
                     step.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
@@ -680,5 +695,41 @@ public class Controller extends JPanel {
         }
         );
         view.add(regrow); // add to panel
+    }
+
+    /**
+     * Add set burning tree to panel
+     */
+    public void addSetXSetY() {
+        JLabel row = new JLabel("Row :"); // set row
+        JLabel col = new JLabel("Col :"); // set column
+
+        X = new JTextField(3); 
+        Y = new JTextField(3);
+
+        setXY = new JLabel("Set burning tree :");
+        submit = new JButton("Burn"); 
+
+        buttonArea3 = new JPanel(new FlowLayout());
+
+        submit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    model.setXsetY(Integer.parseInt(X.getText()), Integer.parseInt(Y.getText())); // send position to model
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Please insert integer number", "Caution!", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        buttonArea3.add(row);
+        buttonArea3.add(X);
+        buttonArea3.add(col);
+        buttonArea3.add(Y);
+        buttonArea3.add(submit);
+
+        view.add(setXY);
+        view.add(buttonArea3); // add to panel
     }
 }
