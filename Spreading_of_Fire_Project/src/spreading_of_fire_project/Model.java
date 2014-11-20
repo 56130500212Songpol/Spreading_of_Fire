@@ -4,7 +4,7 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 15/11/2014
+ * @version 19/11/2014
  */
 import java.util.Random;
 
@@ -13,10 +13,11 @@ public class Model {
     private Cell[][] cell;                              //Assume every cells are on the component
     private View view;                                  //Painting on component 
     private Random random;                              //Random number compare with probCatch, probTree, probBurning
-    private int windSpeed, delay, numCell, positionX, positionY, stepToBurn[][], stepToNotBurn[][], previousState[][];
+    private int windSpeed, delay, numCell, positionX, positionY, stepToBurn[][], stepToNotBurn[][],
+            age[][], previousState[][];
     private double probCatch, probTree, probBurning, probLightning;
-    private boolean stop, lightningStatus, checkCellCannotFire[][], checkCellBurnByLightning[][],
-            checkCellNotBurnByLightning[][], checkCellNotEmptyByBurn[][];
+    private boolean isRegrow, isVary, stop, lightningStatus, checkCellCannotFire[][],
+            checkCellBurnByLightning[][], checkCellNotBurnByLightning[][], checkCellNotEmptyByBurn[][];
     private String direction;
     public static final int NONE = 0, LOW = 1, HIGH = 2;
 
@@ -34,10 +35,12 @@ public class Model {
      * @param direction
      * @param windSpeed
      * @param lightningStatus
+     * @param isVary
+     * @param isRegrow
      */
     public Model(View view, int numCell, double probCatch, double probTree,
             double probBurning, double probLightning, int delay, String direction,
-            int windSpeed, boolean lightningStatus) {
+            int windSpeed, boolean lightningStatus, boolean isVary, boolean isRegrow) {
         this.view = view;
         this.numCell = numCell;
         this.probCatch = probCatch;
@@ -51,6 +54,8 @@ public class Model {
         this.direction = direction;
         this.windSpeed = windSpeed;
         this.lightningStatus = lightningStatus;
+        this.isVary = isVary;
+        this.isRegrow = isRegrow;
         checkCellCannotFire = new boolean[numCell][numCell];
         checkCellBurnByLightning = new boolean[numCell][numCell];
         checkCellNotBurnByLightning = new boolean[numCell][numCell];
@@ -58,6 +63,7 @@ public class Model {
         stepToBurn = new int[numCell][numCell];
         stepToNotBurn = new int[numCell][numCell];
         previousState = new int[numCell][numCell];
+        age = new int[numCell][numCell];
     }
 
     /**
@@ -76,10 +82,12 @@ public class Model {
      * @param direction
      * @param windSpeed
      * @param lightningStatus
+     * @param isVary
+     * @param isRegrow
      */
     public Model(View view, int numCell, int positionX, int positionY, double probCatch,
             double probTree, double probBurning, double probLightning, int delay, String direction,
-            int windSpeed, boolean lightningStatus) {
+            int windSpeed, boolean lightningStatus, boolean isVary, boolean isRegrow) {
         this.view = view;
         this.numCell = numCell;
         this.probCatch = probCatch;
@@ -93,6 +101,8 @@ public class Model {
         this.direction = direction;
         this.windSpeed = windSpeed;
         this.lightningStatus = lightningStatus;
+        this.isVary = isVary;
+        this.isRegrow = isRegrow;
         checkCellCannotFire = new boolean[numCell][numCell];
         checkCellBurnByLightning = new boolean[numCell][numCell];
         checkCellNotBurnByLightning = new boolean[numCell][numCell];
@@ -100,6 +110,7 @@ public class Model {
         stepToBurn = new int[numCell][numCell];
         stepToNotBurn = new int[numCell][numCell];
         previousState = new int[numCell][numCell];
+        age = new int[numCell][numCell];
     }
 
     /**
@@ -107,11 +118,13 @@ public class Model {
      *
      */
     public void initForest() {
+        view.setStep(0);
         cell = new Cell[getNumCell()][getNumCell()];
         for (int i = 0; i <= cell.length - 1; i++) {
             for (int j = 0; j <= cell.length - 1; j++) {
                 cell[i][j] = new Cell(Cell.TREE);
                 stepToBurn[i][j] = 0;
+                checkCellNotEmptyByBurn[i][j] = false;
                 if (random.nextDouble() < probTree) {           //tree at site
                     if (random.nextDouble() < probBurning) {    //tree is burning
                         cell[i][j].setState(Cell.BURNING);
@@ -127,7 +140,7 @@ public class Model {
                 }
             }
         }
-        cell[getPositionX()][getPositionY()].setState(2);       //initail burning tree
+        cell[getPositionX()][getPositionY()].setState(Cell.BURNING);       //initail burning tree
         countTree(); // count the number of tre in forest
         view.updateView(cell);
     }
@@ -145,193 +158,192 @@ public class Model {
                 try {
                     if (cell[i][j].getState() == Cell.BURNING && checkCellCannotFire[i][j] == false
                             && checkCellBurnByLightning[i][j] == false) { // if find burning cell
-                        cell[i][j].setState(0); // burn this cell
-                        if (getDirection().equals("N") && getWindSpeed() == Model.LOW) { // if wind is north and speed is low
+                        if (getDirection().equals("North") && getWindSpeed() == Model.LOW) { // if wind is north and speed is low
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) {// spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                                 if (cell[i][j - 2].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north again
-                                    cell[i][j - 2].setState(2); // tree caught fire 
+                                    cell[i][j - 2].setState(Cell.BURN); // tree caught fire 
                                     checkCellCannotFire[i][j - 2] = true;                   // Cannot burn this tree again
                                 }
                             }
-                        } else if (getDirection().equals("E") && getWindSpeed() == Model.LOW) { // if wind is east and speed is low
+                        } else if (getDirection().equals("East") && getWindSpeed() == Model.LOW) { // if wind is east and speed is low
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                                 if (cell[i + 2][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east again
-                                    cell[i + 2][j].setState(2);
+                                    cell[i + 2][j].setState(Cell.BURN);
                                     checkCellCannotFire[i + 2][j] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to ssouth tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
-                        } else if (getDirection().equals("W") && getWindSpeed() == Model.LOW) { // if wind is west and speed is low
+                        } else if (getDirection().equals("West") && getWindSpeed() == Model.LOW) { // if wind is west and speed is low
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
                                 if (cell[i - 2][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west again
-                                    cell[i - 2][j].setState(2); // tree caught fire
+                                    cell[i - 2][j].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i - 2][j] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
-                        } else if (getDirection().equals("S") && getWindSpeed() == Model.LOW) { // if wind is south and speed is low
+                        } else if (getDirection().equals("South") && getWindSpeed() == Model.LOW) { // if wind is south and speed is low
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
 
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                                 if (cell[i][j + 2].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                    cell[i][j + 2].setState(2);  // tree caught fire
+                                    cell[i][j + 2].setState(Cell.BURN);  // tree caught fire
                                     checkCellCannotFire[i][j + 2] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
-                        } else if (getDirection().equals("N") && getWindSpeed() == Model.HIGH) { // if wind is north and speed is high
+                        } else if (getDirection().equals("North") && getWindSpeed() == Model.HIGH) { // if wind is north and speed is high
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                                 if (cell[i][j - 2].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north again
-                                    cell[i][j - 2].setState(2); // tree caught fire
+                                    cell[i][j - 2].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i][j - 2] = true;                   // Cannot burn this tree again
                                 }
                                 if (cell[i][j - 3].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north again
-                                    cell[i][j - 3].setState(2); // tree caught fire
+                                    cell[i][j - 3].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i][j - 3] = true;                   //Cannot burn this tree again
                                 }
                             }
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
 
                             }
-                        } else if (getDirection().equals("E") && getWindSpeed() == Model.HIGH) { // if wind is east and speed is high
+                        } else if (getDirection().equals("East") && getWindSpeed() == Model.HIGH) { // if wind is east and speed is high
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                                 if (cell[i + 2][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east again
-                                    cell[i + 2][j].setState(2); // tree caught fire
+                                    cell[i + 2][j].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i + 2][j] = true;                   // Cannot burn this tree again
                                 }
                                 if (cell[i + 3][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east again
-                                    cell[i + 3][j].setState(2); // tree caught fire
+                                    cell[i + 3][j].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i + 3][j] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
-                        } else if (getDirection().equals("W") && getWindSpeed() == Model.HIGH) { // if wind is west and speed is high
+                        } else if (getDirection().equals("West") && getWindSpeed() == Model.HIGH) { // if wind is west and speed is high
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
                                 if (cell[i - 2][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west again
-                                    cell[i - 2][j].setState(2); // tree caught fire
+                                    cell[i - 2][j].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i - 2][j] = true;                   // Cannot burn this tree again
                                 }
                                 if (cell[i - 3][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west again
-                                    cell[i - 3][j].setState(2); // tree caught fire
+                                    cell[i - 3][j].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i - 3][j] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
-                        } else if (getDirection().equals("S") && getWindSpeed() == Model.HIGH) { // if wind is south and speed is high
+                        } else if (getDirection().equals("South") && getWindSpeed() == Model.HIGH) { // if wind is south and speed is high
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                                 if (cell[i][j + 2].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south again
-                                    cell[i][j + 2].setState(2); // tree caught fire
+                                    cell[i][j + 2].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i][j + 2] = true;                   // Cannot burn this tree again
                                 }
                                 if (cell[i][j + 3].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south again
-                                    cell[i][j + 3].setState(2); // tree caught fire
+                                    cell[i][j + 3].setState(Cell.BURN); // tree caught fire
                                     checkCellCannotFire[i][j + 3] = true;                   // Cannot burn this tree again
                                 }
                             }
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
 
                             }
                         } else {
                             if (cell[i + 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to east tree
-                                cell[i + 1][j].setState(2); // tree caught fire
+                                cell[i + 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i + 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i - 1][j].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to west tree
-                                cell[i - 1][j].setState(2); // tree caught fire
+                                cell[i - 1][j].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i - 1][j] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j + 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to south tree
-                                cell[i][j + 1].setState(2); // tree caught fire
+                                cell[i][j + 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j + 1] = true;                   // Cannot burn this tree again
                             }
                             if (cell[i][j - 1].getState() == Cell.TREE && random.nextDouble() < getProbCatch()) { // spread to north tree
-                                cell[i][j - 1].setState(2); // tree caught fire
+                                cell[i][j - 1].setState(Cell.BURN); // tree caught fire
                                 checkCellCannotFire[i][j - 1] = true;                   // Cannot burn this tree again
                             }
                         }
@@ -366,7 +378,9 @@ public class Model {
     public boolean noFire() {
         for (int i = 1; i < getNumCell() - 1; i++) {
             for (int j = 1; j < getNumCell() - 1; j++) {
-                if (cell[i][j].getState() == Cell.BURNING || cell[i][j].getState() == Cell.LIGHTNING) { // still have fire in forest
+                if (cell[i][j].getState() == Cell.YOUNG || cell[i][j].getState() == Cell.BURN
+                        || cell[i][j].getState() == Cell.LIGHTNING || cell[i][j].getState() == Cell.ADULT
+                        || cell[i][j].getState() == Cell.OLD || cell[i][j].getState() == Cell.BURNING) { // still have fire in forest or young trees
                     return false;
                 }
             }
@@ -407,34 +421,52 @@ public class Model {
                 if (isLightningStatus() && getProbLightning() > 0) { // if enable lightning strike function
                     int x = (int) (Math.random() * (getNumCell() - 2) + 1); // random stike lightning
                     int y = (int) (Math.random() * (getNumCell() - 2) + 1); // random stike lightning
-                    if (cell[x][y].getState() != Cell.EMPTY) { // if random to the tree that is not empty
+                    if (cell[x][y].getState() == Cell.TREE || cell[x][y].getState() == Cell.BURN) { // if random to the tree that is not empty
                         if (cell[x][y].getState() == Cell.TREE) { // if random to normal tree
                             previousState[x][y] = Cell.TREE; // set previous state of this tree to tree
-                        } else { // if random to burning tree
-                            previousState[x][y] = Cell.BURNING; // set previous state of this tree to burn
+                        } else if (cell[x][y].getState() == Cell.BURN) { // if random to burning tree
+                            previousState[x][y] = Cell.BURN; // set previous state of this tree to burn
                         }
                         cell[x][y].setState(Cell.LIGHTNING); // change the state to lightning struck tree
-                    }
-                    if (previousState[x][y] == Cell.TREE && random.nextDouble() < getProbLightning()) {
-                        // if random less than problightning, tree catched fire
-                        checkCellCannotFire[x][y] = true; // stop to burn
-                        checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
-                    } else if (previousState[x][y] == Cell.BURNING && random.nextDouble() < getProbCatch() * getProbLightning()) {
-                        // if random less than probCatch * problightning, tree catched fire
-                        checkCellCannotFire[x][y] = true; // stop to burn
-                        checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
-                    } else { // tree not catch fire by lightning 
-                        if (previousState[x][y] != Cell.EMPTY) { // change tree back to normal tree 
-                            checkCellNotBurnByLightning[x][y] = true;
+
+                        if (previousState[x][y] == Cell.TREE && random.nextDouble() < getProbLightning()) {
+                            // if random less than problightning, tree catched fire
+                            checkCellCannotFire[x][y] = true; // stop to burn
+                            checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+                        } else if (previousState[x][y] == Cell.BURN && random.nextDouble() < getProbCatch() * getProbLightning()) {
+                            // if random less than probCatch * problightning, tree catched fire
+                            checkCellCannotFire[x][y] = true; // stop to burn
+                            checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+                        } else { // tree not catch fire by lightning 
+                            if (previousState[x][y] == Cell.TREE || previousState[x][y] == Cell.BURN) { // change tree back to normal tree 
+                                checkCellNotBurnByLightning[x][y] = true;
+                            }
                         }
                     }
-
+                }
+                if (isIsVary() && getWindSpeed() != 0) { // if users select wind vary, and set win speed more than 0
+                    int randomNumber = random.nextInt(100); // random number from 0 to 100
+                    if (randomNumber <= 25) { // if random number less than or equal 25
+                        setDirection("North"); // set direction of wind to north
+                    } else if (randomNumber > 25 && randomNumber <= 50) { // if random number more than 25 and less than or equal 50
+                        setDirection("East"); // set direction of wind to east
+                    } else if (randomNumber > 50 && randomNumber <= 75) { // if random number more than 50 and less than or equal 75
+                        setDirection("West"); // set direction of wind to west
+                    } else { // if random number more than 75
+                        setDirection("South"); // set direction of wind to south
+                    }
                 }
                 resetStepToBurn(); // count fire step, and burn tree that was striked by lightning
                 resetNotBurn(); // reset cell that not burn by lightning
                 resetCheck(); // reset check tree that cannot burn twice
                 view.updateView(cell); // update the component
                 Thread.sleep(2); // multi thread
+
+                burnTree(); // burn fire tree
+                if (isRegrow) { // if user enable auto regrow
+                    increaseTreeAge(); // tree auto grow
+                }
+
             }
             countBurn(); // count burned tree
         } catch (InterruptedException e) {
@@ -453,35 +485,69 @@ public class Model {
             if (isLightningStatus() && getProbLightning() > 0) { // if enable lightning strike function
                 int x = (int) (Math.random() * (getNumCell() - 2) + 1); // random stike lightning
                 int y = (int) (Math.random() * (getNumCell() - 2) + 1); // random stike lightning
-                if (cell[x][y].getState() != Cell.EMPTY) { // if random to the tree that is not empty
+                if (cell[x][y].getState() == Cell.TREE || cell[x][y].getState() == Cell.BURN) { // if random to the tree that is not empty
                     if (cell[x][y].getState() == Cell.TREE) { // if random to normal tree
                         previousState[x][y] = Cell.TREE; // set previous state of this tree to tree
-                    } else { // if random to burning tree
-                        previousState[x][y] = Cell.BURNING; // set previous state of this tree to burn
+                    } else if (cell[x][y].getState() == Cell.BURN) { // if random to burning tree
+                        previousState[x][y] = Cell.BURN; // set previous state of this tree to burn
                     }
                     cell[x][y].setState(Cell.LIGHTNING); // change the state to lightning struck tree
-                }
-                if (previousState[x][y] == Cell.TREE && random.nextDouble() < getProbLightning()) {
-                    // if random less than problightning, tree catched fire
-                    checkCellCannotFire[x][y] = true; // stop to burn
-                    checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
-                } else if (previousState[x][y] == Cell.BURNING && random.nextDouble() < getProbCatch() * getProbLightning()) {
-                    // if random less than probCatch * problightning, tree catched fire
-                    checkCellCannotFire[x][y] = true; // stop to burn
-                    checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
-                } else { // tree not catch fire by lightning 
-                    if (previousState[x][y] != Cell.EMPTY) { // change tree back to normal tree 
-                        checkCellNotBurnByLightning[x][y] = true;
+                    if (previousState[x][y] == Cell.TREE && random.nextDouble() < getProbLightning()) {
+                        // if random less than problightning, tree catched fire
+                        checkCellCannotFire[x][y] = true; // stop to burn
+                        checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+                    } else if (previousState[x][y] == Cell.BURN && random.nextDouble() < getProbCatch() * getProbLightning()) {
+                        // if random less than probCatch * problightning, tree catched fire
+                        checkCellCannotFire[x][y] = true; // stop to burn
+                        checkCellBurnByLightning[x][y] = true; // wait 5 step to burn this tree
+                    } else { // tree not catch fire by lightning 
+                        if (previousState[x][y] == Cell.TREE || previousState[x][y] == Cell.BURN) { // change tree back to normal tree 
+                            checkCellNotBurnByLightning[x][y] = true;
+                        }
                     }
                 }
-
+            }
+            if (isIsVary() && getWindSpeed() != 0) { // if users select wind vary, and set win speed more than 0
+                int randomNumber = random.nextInt(100); // random number from 0 to 100
+                if (randomNumber <= 25) { // if random number less than or equal 25
+                    setDirection("North"); // set direction of wind to north
+                } else if (randomNumber > 25 && randomNumber <= 50) { // if random number more than 25 and less than or equal 50
+                    setDirection("East"); // set direction of wind to east
+                } else if (randomNumber > 50 && randomNumber <= 75) { // if random number more than 50 and less than or equal 75
+                    setDirection("West"); // set direction of wind to west
+                } else { // if random number more than 75
+                    setDirection("South"); // set direction of wind to south
+                }
             }
             resetStepToBurn(); // count fire step, and burn tree that was striked by lightning
             resetNotBurn(); // reset cell that not burn by lightning
+            burnTree(); // burn fire tree
+            if (isRegrow) { // if user enable auto regrow
+                increaseTreeAge(); // tree auto grow
+            }
+
         }
         Controller.isAuto = false; // can change size of forest and regrow tree when finish spread
         Controller.clickAuto = false;
         countBurn(); // count burned tree
+    }
+
+    /**
+     * Apply spread method to forest until forest do not has burning tree on its
+     * ten times.
+     *
+     */
+    public void applySpread10times() {
+        if (view.isIsTen()) { // if run spread ten times
+            int i = 0;
+            while (i < 10) {
+                applySpread(); // apply spread fire 10 times
+                i++;
+                if (i != 10) {
+                    initForest(); // reset forest each time
+                }
+            }
+        }
     }
 
     /**
@@ -497,7 +563,7 @@ public class Model {
                     // if cell has 5 step, reset to 0
                     if (stepToBurn[i][j] - 5 == 0) {
                         checkCellBurnByLightning[i][j] = false; // can spread from these tree
-                        cell[i][j].setState(Cell.BURNING); // burn this tree
+                        cell[i][j].setState(Cell.BURN); // burn this tree
                         stepToBurn[i][j] = 0;
                     }
                 }
@@ -519,7 +585,7 @@ public class Model {
                     // if cell has 2 step, reset to 0
                     if (stepToNotBurn[i][j] - 2 == 0) {
                         checkCellNotBurnByLightning[i][j] = false; // can struck by lightning again
-                        if (previousState[i][j] == Cell.TREE || previousState[i][j] == Cell.BURNING) {
+                        if (previousState[i][j] == Cell.TREE || previousState[i][j] == Cell.BURN) {
                             cell[i][j].setState(Cell.TREE);
                         }
                         stepToNotBurn[i][j] = 0;
@@ -674,7 +740,7 @@ public class Model {
 
     /**
      * Get the value of windSpeed
-     * 
+     *
      * @return windSpeed
      */
     public int getWindSpeed() {
@@ -692,7 +758,7 @@ public class Model {
 
     /**
      * Get the wind direction
-     * 
+     *
      * @return direction
      */
     public String getDirection() {
@@ -711,7 +777,7 @@ public class Model {
     /**
      * Set the boolean lightningStatus
      *
-     * @return 
+     * @return
      */
     public boolean isLightningStatus() {
         return lightningStatus;
@@ -719,7 +785,7 @@ public class Model {
 
     /**
      * Get the boolean lightningStatus
-     * 
+     *
      * @param lightningStatus
      */
     public void setLightningStatus(boolean lightningStatus) {
@@ -754,7 +820,6 @@ public class Model {
                 }
             }
         }
-        System.out.println(view.getBurn());
     }
 
     /**
@@ -768,11 +833,103 @@ public class Model {
 
     /**
      * Set the boolean of stop
-     * 
+     *
      * @param stop
      */
     public void setStop(boolean stop) {
         this.stop = stop;
     }
 
+    /**
+     * Get the boolean of isVary
+     *
+     * @return isVary
+     */
+    public boolean isIsVary() {
+        return isVary;
+    }
+
+    /**
+     * Set the boolean of isVary
+     *
+     * @param isVary
+     */
+    public void setIsVary(boolean isVary) {
+        this.isVary = isVary;
+    }
+
+    /**
+     * Re grow and increasing age of tree that was burned by fire in the forest.
+     *
+     */
+    public void increaseTreeAge() {
+        for (int i = 1; i < cell.length - 1; i++) {
+            for (int j = 1; j < cell.length - 1; j++) {
+                try {
+                    if (cell[i][j].getState() == Cell.EMPTY && !checkCellNotEmptyByBurn[i][j]) { // if tree burned
+                        age[i][j]++;
+                        if (age[i][j] == 22) {
+                            cell[i][j].setState(); // regrow tree to young tree
+                        }
+                    } else if (cell[i][j].getState() == Cell.YOUNG) { // if tree is young
+                        age[i][j]++;
+                        if (age[i][j] == 44) {
+                            cell[i][j].setState(); // evolve to adult tree
+                        }
+                    } else if (cell[i][j].getState() == Cell.ADULT) { // if tree is adult
+                        age[i][j]++;
+                        if (age[i][j] == 66) {
+                            cell[i][j].setState(); // evolve to old tree
+                        }
+                    } else if (cell[i][j].getState() == Cell.OLD) { // if tree is old
+                        age[i][j]++;
+                        if (age[i][j] == 88) {
+                            cell[i][j].setState(); // evolve to tree(can catch fire)
+                            age[i][j] = 0;
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Burn tree that already catch fire from spreading
+     *
+     */
+    public void burnTree() {
+        for (int i = 1; i < cell.length - 1; i++) {
+            for (int j = 1; j < cell.length - 1; j++) {
+                try {
+                    if (cell[i][j].getState() == Cell.BURN) { // if tree catch fire
+                        cell[i][j].setState(Cell.BURNING); // change to intense fire
+                    } else if (cell[i][j].getState() == Cell.BURNING) { // if tree come to intense fire
+                        cell[i][j].setState(Cell.EMPTY); // good bye tree TT
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    /**
+     * Get the boolean of isRegrow
+     *
+     * @return isRegrow
+     */
+    public boolean isIsRegrow() {
+        return isRegrow;
+    }
+
+    /**
+     * Set the boolean of isRegrow
+     *
+     * @param isRegrow
+     */
+    public void setIsRegrow(boolean isRegrow) {
+        this.isRegrow = isRegrow;
+    }
 }

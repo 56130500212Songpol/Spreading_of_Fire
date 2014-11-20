@@ -4,11 +4,11 @@ package spreading_of_fire_project;
  * This cell class that contains the state of cell
  *
  * @author OOSD Project Group 5
- * @version 15/11/2014
+ * @version 18/11/2014
  */
 public class Cell {
 
-    public static final int EMPTY = 0, TREE = 1, BURNING = 2, LIGHTNING = 7;
+    public static final int EMPTY = 0, YOUNG = 1, ADULT = 2, OLD = 3, TREE = 4, BURN = 5, BURNING = 6, LIGHTNING = 7;
     private int state;
 
     /**
@@ -44,5 +44,12 @@ public class Cell {
     public void setState(int state) {
         this.state = state;
     }
-    
+
+    /**
+     * increase the state(age) of cell
+     *
+     */
+    public void setState() {
+        this.state = this.state+1;
+    }
 }
