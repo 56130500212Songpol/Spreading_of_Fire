@@ -4,7 +4,7 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 20/11/2014
+ * @version 21/11/2014
  */
 import java.util.Random;
 import javax.swing.JOptionPane;
