@@ -120,6 +120,7 @@ public class Controller extends JPanel {
                 view.setIsTen(true); // Spread 10 times
                 auto.setEnabled(false);
                 step.setEnabled(false);
+                regrow.setEnabled(false);
                 Thread t = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -144,6 +145,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the burned cell in the forest
                     view.setIsTen(false);
@@ -253,6 +255,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -283,6 +286,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -313,6 +317,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -343,6 +348,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -373,6 +379,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -403,6 +410,7 @@ public class Controller extends JPanel {
                     }
                     auto.setEnabled(true);
                     step.setEnabled(true);
+                    regrow.setEnabled(true);
                     view.setTree(0); // reset the value of tree in the forest
                     view.setBurn(0); // reset the value of burned tree in the forest
                     view.setIsTen(false);
@@ -685,6 +693,7 @@ public class Controller extends JPanel {
                     regrow.setText("Auto Regrow : Enable");
                     model.setIsRegrow(true); // enable auto regrow in the forest
                     autoTen.setEnabled(false); // cannot use auto ten
+                    view.setStep(0);
                 } else { // if did not select this check box, change to disable auto regrow
                     regrow.setText("Auto Regrow : Disable");
                     model.setIsRegrow(false); // disable auto regrow in the forest
