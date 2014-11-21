@@ -19,6 +19,7 @@ An introduction of simulation of spreading of fire
 * javax.swing.JRadioButton
 * javax.swing.JSlider
 * javax.swing.JCheckBox
+* javax.swing.JTextField
 * java.awt.Container
 * java.awt.Graphics
 * java.awt.Color

@@ -10,7 +10,7 @@ import javax.swing.JPanel;
  * The view class of project
  *
  * @author OOSD Project Group 5
- * @version 19/11/2014
+ * @version 21/11/2014
  */
 public class View extends JPanel {
 
@@ -39,7 +39,7 @@ public class View extends JPanel {
         //do not see value of each cell
         seeValue = false;
 
-        setLayout(new FlowLayout(5, 655, 0));
+        setLayout(new FlowLayout(5, 655, -1));
 
     }
 
@@ -103,6 +103,7 @@ public class View extends JPanel {
                             } else {
                                 g.drawString("6", x + getPixel() - 14, y + getPixel() - 6);//if cell is burning cell, set string to 2
                             }
+                            g.setColor( new Color(200,200,200));
                             g.drawRect(x, y, getPixel(), getPixel());
                         }
                     }
@@ -113,14 +114,14 @@ public class View extends JPanel {
         g.setFont(DEFAULT_FONT);
         // compute the percent burned trees
         if (isTen) { // if run 10 times
-            g.drawString("Average burned : " + getAvgBurn() + " %", 658, 625); // show average percentage
+            g.drawString("Average burned : " + getAvgBurn() + " %", 656, 640); // show average percentage
         } else { // if run one times
-            g.drawString("Forest burned : " + getAvgBurn() + " %", 658, 625); // show percentage
+            g.drawString("Forest burned : " + getAvgBurn() + " %", 656, 640); // show percentage
         }
         g.setColor(VALUE_COLOR);
         g.setFont(DEFAULT_FONT);
         // show the value of step
-        g.drawString("Step : " + getStep(), 810, 625);
+        g.drawString("Step : " + getStep(), 805, 640);
     }
 
     /**
