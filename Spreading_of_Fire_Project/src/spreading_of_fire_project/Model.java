@@ -4,7 +4,7 @@ package spreading_of_fire_project;
  * The model class of project contain logic of spreading fire of forest
  *
  * @author OOSD Project Group 5
- * @version 21/11/2014
+ * @version 20/11/2014
  */
 import java.util.Random;
 import javax.swing.JOptionPane;
@@ -139,7 +139,7 @@ public class Model {
                 }
             }
         }
-        cell[getPositionX()][getPositionY()].setState(Cell.BURNING);       //initail burning tree
+        cell[getPositionX()][getPositionY()].setState(Cell.BURN);       //initail burning tree
         countTree(); // count the number of tre in forest
         view.updateView(cell);
     }
@@ -931,10 +931,10 @@ public class Model {
      */
     public void setXsetY(int x, int y) {
         try {
-            if (cell[x][y].getState() != Cell.EMPTY && (x != getNumCell() / 2 ^ y != getNumCell() / 2)) { // cannot burn tree on empty cell, and initiate burn tree
+            if (cell[x][y].getState() != Cell.EMPTY) { // cannot burn tree on empty cell, and initiate burn tree
                 if (cell[x][y].getState() != Cell.BURNING) {
-                    cell[x][y].setState(6); // if it is tree, set to burning
-                } else {
+                    cell[x][y].setState(5); // if it is tree, set to burning
+                } else if(cell[x][y].getState() != Cell.BURNING && (x != getNumCell() / 2 ^ y != getNumCell() / 2)){
                     cell[x][y].setState(4); // if it burning set to tree
                 }
                 view.updateView(cell);
