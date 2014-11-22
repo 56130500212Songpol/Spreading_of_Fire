@@ -726,7 +726,7 @@ public class Controller extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    model.setXsetY(Integer.parseInt(X.getText()), Integer.parseInt(Y.getText())); // send position to model
+                    model.setXsetY(Integer.parseInt(Y.getText()), Integer.parseInt(X.getText())); // send position to model
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Please insert integer number", "Caution!", JOptionPane.ERROR_MESSAGE);
                 }
